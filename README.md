@@ -19,7 +19,7 @@ Now you can explore the loaded image. If needed, set its type into "Fluorescence
    * Set the output file name in the script
    * Run the script
 
-## Step 3 - Fluorescence threshold optimization on the image 
+## Step 3 - Fluorescence threshold calibration on the image 
 
 ## Step 4 - Nuclei detection and cell-level quantification with DeepCell
 
