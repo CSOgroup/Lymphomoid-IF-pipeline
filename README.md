@@ -10,6 +10,15 @@ When loading a .vsi raw image file, sometimes the same file will contain more th
 
 Now you can explore the loaded image. If needed, set its type into "Fluorescence". You can change brightness, contrast and show/hide the different channels, corresponding to the different stained proteins. Sometimes it is useful to look at a single channel in grayscale mode. 
 
+In the first batch of images, the channel-protein association was: 
+* DAPI = Nuclei staining
+* FITC = CD20 (B cells)
+* CY5 = KI67 (proliferation)
+* CFP = CD4 (CD4 T cells)
+* RFP = CD8 (CD8 T cells)
+* Alexa 594 = CD68 (macrophages)
+
+
 ## Step 2 - Lymphomoid(s) boundary drawing
 1. For each lymphomoid, draw a closed boundary with QuPath polygon tool
 2. Open _getBoundary.groovy_ script in QuPath script editor (Automate -> Show script editor)
