@@ -15,9 +15,9 @@ Now you can explore the loaded image. If needed, set its type into "Fluorescence
 2. Open _getBoundary.groovy_ script in QuPath script editor (Automate -> Show script editor)
 3. In the script, set the absolute path to your desired output directory
 4. For each boundary:
-...* Select the boundary itself (double click - a selected boundary is displayed in yellow)
-...* Set the output file name in the script
-...* Run the script
+⋅⋅* Select the boundary itself (double click - a selected boundary is displayed in yellow)
+⋅⋅* Set the output file name in the script
+⋅⋅* Run the script
 
 ## Step 3 - Fluorescence threshold optimization on the image 
 
