@@ -40,8 +40,17 @@ In this step, you will tune the thresholds for each channel to classify a cell a
    * Hover the cursor on the nuclei to have an idea on what might be the threshold
    * Assign a reasonable threshold guess to the _DAPI_thresh_ variable in the _Input_ section of the script
    * Run the script and inspect the results visually. You can view/hide the detections in QuPath with View->Show detections (Keyboard shortcut: D)
-   * If nuclei have been under- (or over-) called, change the threshold until you are satisfied with the results
-5. 
+   * If nuclei have been under- (or over-) called, change the DAPI threshold until you are satisfied with the results
+5. Tune the FITC threshold:
+   * In the 'Brigthness & contrast' menu, show the FITC channel
+   * Hover the cursor on the FITC stained cytoplasms to have an idea on what might be the threshold
+   * Assign a reasonable threshold guess to the _FITC_thresh_ variable in the _Input_ section of the script
+   * In the _Calibration_ section of the script, uncomment the line related to the FITC classification (_setCellIntensityClassifications("Cytoplasm: FITC mean", FITC_thresh_) by removing the groovy comment symbol ('//') 
+   * Run the script and inspect the results visually. Cells positive for FITC will appear in red, negative cells will be blue.
+   * Tune the FITC threshold until you are satisfied with the results
+   * Once you are done, comment out again the line related to the FITC classification. Don't ever comment out the line related to the DAPI nuclei detection.
+6. Repeat step 5 for all the other channels. Remember that at every tuning round only two lines in the _Calibration_ section should be uncommented: the DAPI detection and the intensity classification of your channel of interest
+7. At each run, the script is saving and overwriting the output file with all the thresholds. Thus, after your last run, with all the thresholds already tuned, the output file will be the final one that will be used in the downstream analyses
 
 ## Step 4 - Nuclei detection and cell-level quantification with DeepCell
 
