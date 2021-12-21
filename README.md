@@ -50,7 +50,8 @@ In this step, you will tune the thresholds for each channel to classify a cell a
    * Tune the FITC threshold until you are satisfied with the results
    * Once you are done, comment out again the line related to the FITC classification. Don't ever comment out the line related to the DAPI nuclei detection.
 6. Repeat step 5 for all the other channels. Remember that at every tuning round only two lines in the _Calibration_ section should be uncommented: the DAPI detection and the intensity classification of your channel of interest
-7. At each run, the script is saving and overwriting the output file with all the thresholds. Thus, after your last run, with all the thresholds already tuned, the output file will be the final one that will be used in the downstream analyses
+7. If you wish, repeat all the steps from 1 to 6 drawing a different rectangular region, to test whether your thresholds would stay the same or not
+8. At each run, the script is saving and overwriting the output file with all the thresholds. Thus, after your last run, with all the thresholds already tuned, the output file will be the final one that will be used in the downstream analyses
 
 ## Step 4 - Nuclei detection and cell-level quantification with DeepCell
 
