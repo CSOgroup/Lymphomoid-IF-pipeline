@@ -30,7 +30,7 @@ runPlugin('qupath.imagej.detect.cells.WatershedCellDetection', '{"detectionImage
 // // CY5 (Ki67)
 // setCellIntensityClassifications("Nucleus: CY5 mean", CY5_thresh)
 // // CFP (CD4 T-cells)
- setCellIntensityClassifications("Cytoplasm: CFP mean", CFP_thresh)
+// setCellIntensityClassifications("Cytoplasm: CFP mean", CFP_thresh)
 // // RFP (CD8 T-cells)
 // setCellIntensityClassifications("Cytoplasm: RFP mean", RFP_thresh)
 // // Alexa 594 (macrophages)
