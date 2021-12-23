@@ -31,7 +31,7 @@ In this step, you will draw and save the coordinates of the boundaries of all ly
 
 
 ## Step 3 - Fluorescence threshold calibration on the image
-In this step, you will tune the thresholds for each channel to classify a cell as "positive" or not for each of the proteins. To do so, a script will automatically detect nuclei and classify cells according to the thresholds that you give it as input (for DAPI and Ki67, cells will be classified according to the fluorescence levels inside the nuclei; for all other markers, the fluorescence levels will be thresholded in the cytoplasmic regions). Tune the threshold of each channel until you are satisfied with the classification. Finally, the script stores all the tuned thresholds in a text file. Here are the detailed (sub)steps:
+In this step, you will tune the thresholds for each channel to classify a cell as "positive" or not for each of the proteins. To do so, a script will automatically detect nuclei and classify cells according to the thresholds that you give it as input (for DAPI and Ki67, cells will be classified according to the fluorescence levels inside the nuclei; for all other markers, the fluorescence levels will be thresholded in the cytoplasmic regions). Tune the threshold of each channel until you are satisfied with the classification. Finally, the script stores all the tuned thresholds in a text file, that will be used in the downstream analyses. Here are the detailed (sub)steps:
 1. Draw a rectangular region that seems to contain cells positive for each of the channels
 2. Open _calibrateThresholds.groovy_ script in QuPath script editor
 3. In the script, set the absolute path to your desired output directory (_OutDir_) and the image name (_ImageName_) in the _Input_ section. These have to be the same as for the boundary drawing (Step 2, point 3).
@@ -40,18 +40,18 @@ In this step, you will tune the thresholds for each channel to classify a cell a
    * Hover the cursor on the nuclei to have an idea on what might be the threshold
    * Assign a reasonable threshold guess to the _DAPI_thresh_ variable in the _Input_ section of the script
    * Run the script and inspect the results visually. You can view/hide the detections in QuPath with View->Show detections (Keyboard shortcut: D)
-   * If nuclei have been under- (or over-) called, change the DAPI threshold until you are satisfied with the results
+   * If nuclei have been under- (or over-) called, change the DAPI threshold and re-run the script until you are satisfied with the results
 5. Tune the FITC threshold:
    * In the 'Brigthness & contrast' menu, show the FITC channel
    * Hover the cursor on the FITC stained cytoplasms to have an idea on what might be the threshold
    * Assign a reasonable threshold guess to the _FITC_thresh_ variable in the _Input_ section of the script
    * In the _Calibration_ section of the script, uncomment the line related to the FITC classification (_setCellIntensityClassifications("Cytoplasm: FITC mean", FITC_thresh_) by removing the groovy comment symbol ('//') 
    * Run the script and inspect the results visually. Cells positive for FITC will appear in red, negative cells will be blue.
-   * Tune the FITC threshold until you are satisfied with the results
+   * Tune the FITC threshold and re-run the script until you are satisfied with the results
    * Once you are done, comment out again the line related to the FITC classification. Don't ever comment out the line related to the DAPI nuclei detection.
 6. Repeat step 5 for all the other channels. Remember that at every tuning round only two lines in the _Calibration_ section should be uncommented: the DAPI detection and the intensity classification of your channel of interest
 7. If you wish, repeat all the steps from 1 to 6 drawing a different rectangular region, to test whether your thresholds would stay the same or not
-8. At each run, the script is saving and overwriting the output file with all the thresholds. Thus, after your last run, with all the thresholds already tuned, the output file will be the final one that will be used in the downstream analyses
+8. At each run, the script is saving and overwriting the output file with all the thresholds. Thus, your last run should be done with all the thresholds already tuned, as the final output file will be saved with those. If you want to run the script without saving the file, comment out the _Saving_ section
 
 ## Step 4 - Nuclei detection and cell-level quantification with DeepCell
 
