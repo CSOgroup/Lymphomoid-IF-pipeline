@@ -127,6 +127,10 @@ Then you need to run the _cellDetection.py_ script, with the following required 
 
 An example of the script calling is: `python3 cellDetection.py --dir /mnt/data2/varrone/elisa_lymphomoids/Quantification/ --sample_names HLS16_01acq01 HLS16_01acq02 HSL16_29acq01`
 
+A lot of warning messages will appear, but they are normal. As long as the message `Channels extracted successfully.` appears, the software will have worked successfully. 
+
+The run may take a while for each image (tens of minutes). For this reason, it is suggested to pass many images at the same time through the `--sample_names` parameters and run the script overnight.
+
 ### Marker quantification (i.e. segmentation)
 This step obtains for each cell, from its mask detected in the cell detection step, the mean intensities of each of the markers in the nucleus and in the cytoplasm.
 
