@@ -53,7 +53,63 @@ In this step, you will tune the thresholds for each channel to classify a cell a
 7. If you wish, repeat all the steps from 1 to 6 drawing a different rectangular region, to test whether your thresholds would stay the same or not
 8. At each run, the script is saving and overwriting the output file with all the thresholds. Thus, your last run should be done with all the thresholds already tuned, as the final output file will be saved with those. If you want to run the script without saving the file, comment out the _Saving_ section
 
-## Step 4 - Nuclei detection and cell-level quantification with DeepCell
+## Step 4 - Nuclei detection and cell-level quantification with DeepCell (work in progress)
+DeepCell is a nuclei and cell segmentation software that is more robust to different levels of marker intensity and, thus, gives better results when the intensity of DAPI varies dramatically in the same sample.
+
+The whole process of segmenting the cells and extract the intensity of the markers is fairly automatized. The crucial step is to setup the input directories and files properly.
+
+
+
+### Setup of the input files
+The software is already installed on the uporicchiosrv1 server, so it's strongly suggested to setup the directories on the server.
+
+Create a directory on the server that will contain the input and output files. Do not use the same directory as the one containing the original .vsi images because you will need to convert those images into another format.
+
+Mount the newly created directory to your local machine (e.g., _HLS\_Quantification_). If you are using _sshfs_ on a Mac, add the `-o defer_permissions` parameter to avoid problems of permission denied when saving files.
+
+Then, create a new directory inside _HLS\_Quantification_ for each of the images. And inside oeach of these, create a directory called _registration_.
+
+For example:
+
+```bash
+HLS_Quantification
+├── HLS25_7
+│   ├── registration
+├── HLS25_41acq01
+│   ├── registration
+├── HLS25_41acq03
+│   ├── registration
+...
+```
+
+### VSI to .OME.TIF format conversion
+In this step we will convert the images from the .vsi to the .ome.tif format.
+For each of the images:
+1. Open the image in QuPath
+2. Go to File -> Export images... -> Original pixels
+3. Select the OME TIFF format and a downsample factor of 1.0
+4. Select as output path the registration folder of the corresponding image in _HLS\_Quantification_. It is suggested (but not required) to use a filename the same name chosen for the image.
+
+The directory structure should now look like:
+```bash
+HLS_Quantification
+├── HLS25_7
+│   ├── registration
+│   │   ├──HLS25_7.ome.tif
+├── HLS25_41acq01
+│   ├── registration
+│   │   ├──HLS25_41acq01.ome.tif
+├── HLS25_41acq03
+│   ├── registration
+│   │   ├──HLS25_41acq03.ome.tif
+...
+```
+
+WARNING: the export may take a while depending on the size of the image and the network speed (tens of minutes). QuPath may not respond during that time.
+For this reason we are trying to setup a semi-automatic export script directly from the server.
 
 ## Step 5 - (downstream analyses)
+
+# To-do
+
 
