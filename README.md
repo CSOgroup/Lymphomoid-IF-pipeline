@@ -53,7 +53,59 @@ In this step, you will tune the thresholds for each channel to classify a cell a
 7. If you wish, repeat all the steps from 1 to 6 drawing a different rectangular region, to test whether your thresholds would stay the same or not
 8. At each run, the script is saving and overwriting the output file with all the thresholds. Thus, your last run should be done with all the thresholds already tuned, as the final output file will be saved with those. If you want to run the script without saving the file, comment out the _Saving_ section
 
-## Step 4 - Nuclei detection and cell-level quantification with DeepCell
+## Step 4 - Nuclei detection and cell-level quantification with DeepCell (work in progress)
+DeepCell is a nuclei and cell segmentation software that is more robust to different levels of marker intensity and, thus, gives better results when the intensity of DAPI varies dramatically in the same sample.
+
+The whole process of segmenting the cells and extract the intensity of the markers is fairly automatized. The crucial step is to setup the input directories and files properly.
+
+
+
+### Setup of the input files
+The software is already installed on the uporicchiosrv1 server, so it's strongly suggested to setup the directories on the server.
+
+Create a directory on the server that will contain the input and output files. Do not use the same directory as the one containing the original .vsi images because you will need to convert those images into another format.
+
+Mount the newly created directory to your local machine (e.g., _HLS\_Quantification_). If you are using _sshfs_ on a Mac, add the `-o defer_permissions` parameter to avoid problems of permission denied when saving files.
+
+Then, create a new directory inside _HLS\_Quantification_ for each of the images. And inside each of these, create a directory called _registration_.
+
+For example:
+
+```bash
+HLS_Quantification
+├── HLS25_7
+│   ├── registration
+├── HLS25_41acq01
+│   ├── registration
+├── HLS25_41acq03
+│   ├── registration
+...
+```
+
+### VSI to .OME.TIF format conversion
+In this step we will convert the images from the .vsi to the .ome.tif format. It requires the [ImageJ](https://imagej.nih.gov/ij/download.html) or [Fiji](https://imagej.net/software/fiji/) software.
+For each of the images:
+1. Open the .vsi image in ImageJ/Fiji
+2. A popup called "BioFormats Import Options" will open. Press OK without any modification.
+3. Another popup with a list of images will appear.<br><p align="center"> <img src="img/fiji_series_1.png" alt="Fiji series" width="200"/></p><br>
+4. The first image will be automatically selected. Deselect it.
+5. Scrolling down you will start to see acquisitions of the lymphomoids and each acquisition will be repeated many times. Each replicate is the same acquisition at different resolutions. Select only the images that correspond to the highest resolutions, which usually have _20x_NUMBER_ in their name. IMPORTANT: do not select images that were discarded in QuPath in Step 1. It may take a while (5-10 minutes) to open them. Another popup with a list of images will appear.<br><p align="center"> <img src="img/fiji_series_2.png" alt="Fiji series" width="200"/></p><br>
+6. After the images are loaded in ImageJ/Fiji, for each one of them individually, click on File -> Save as -> Tiff... and select the registration folder corresponding to the selected image. It's strongly suggested to use as name of the file, the same name of the corresponding folder (see next directory structure...).
+
+The directory structure should now look like:
+```bash
+HLS_Quantification
+├── HLS25_7
+│   ├── registration
+│   │   ├──HLS25_7.tif
+├── HLS25_41acq01
+│   ├── registration
+│   │   ├──HLS25_41acq01.tif
+├── HLS25_41acq03
+│   ├── registration
+│   │   ├──HLS25_41acq03.tif
+...
+```
 
 ## Step 5 - (downstream analyses)
 
