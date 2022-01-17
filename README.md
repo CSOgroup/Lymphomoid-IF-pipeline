@@ -112,16 +112,40 @@ To be able to access the packages you need to activate the environment using:
 
 `source /mnt/data2/shared/Lymphomoid-IF-software/Lymphomoid-IF-venv/bin/activate`
 
-Then you need to run the _cellDetection.py_ script, with the following parameters:
+Then you need to run the _cellDetection.py_ script, with the following required parameters:
 - `--sample_names`: the name of the images for cell detection, it could be 1 or many, separated by a whitespace.
 - `--dir`: the absolute path of the _HLS\_Quantification_ directory
 
-Some other parameters may be required in case of non-standard uses of the pipeline, so they can usually be ignored:
-- `--deepcell_path`: the absolute path to the Singularity image of DeepCell. The default is _/mnt/data2/shared/Lymphomoid-IF-software/deepcell.sif_ where is already present.
-- `--nucleus_channel`: the index in the tif file of the channel associated to the nuclear marker (e.g. DAPI). The default is `0`.
-- `--membrane_channels`: the indices in the tif file of the channels asscoiated to membrane markers. The default is `1 3 4 5` because the channel placed at index 2 is KI67, which is a nuclear (i.e. not membrane) marker.
+<details>
+<summary>Some other parameters may be required in case of non-standard uses of the pipeline, so they can usually be ignored</summary>
 
-Thus, an example of the script calling is: `python3 cellDetection.py --dir /mnt/data2/varrone/elisa_lymphomoids/Quantification/ --sample_names HLS16_01acq01 HLS16_01acq02 HSL16_29acq01`
+* `--deepcell_path`: the absolute path to the Singularity image of DeepCell. The default is `/mnt/data2/shared/Lymphomoid-IF-software/deepcell.sif` where is already present.
+* `--nucleus_channel`: the index in the tif file of the channel associated to the nuclear marker (e.g. DAPI). The default is `0`.
+* `--membrane_channels`: the indices in the tif file of the channels asscoiated to membrane markers. The default is `1 3 4 5` because the channel placed at index 2 is KI67, which is a nuclear (i.e. not membrane) marker.
+
+</details>
+
+An example of the script calling is: `python3 cellDetection.py --dir /mnt/data2/varrone/elisa_lymphomoids/Quantification/ --sample_names HLS16_01acq01 HLS16_01acq02 HSL16_29acq01`
+
+### Marker quantification (i.e. segmentation)
+This step obtains for each cell, from its mask detected in the cell detection step, the mean intensities of each of the markers in the nucleus and in the cytoplasm.
+
+If the virtual environment has not been activated from the cell detection part, run the `source /mnt/data2/shared/Lymphomoid-IF-software/Lymphomoid-IF-venv/bin/activate` command to activate the virtual environment.
+
+Then, run the _quantifyIntensities.py_ script, with the same required parameters as in the cell detection step:
+* `--sample_names`: the name of the images for cell detection, it could be 1 or many, separated by a whitespace.
+* `--dir`: the absolute path of the _HLS\_Quantification_ directory
+
+<details>
+<summary>Parameters for non-standard uses of the pipeline</summary>
+
+* `--nextflow_dir`: path to the Nextflow software. The default is `/mnt/data2/shared/Lymphomoid-IF-software/nextflow` where is already present.
+* `--markers`: the ordered name of the markers separated by a whitespace. The default is `DAPI CD20 Ki67 CD4 CD8 CD68`
+
+</details>
+
+An example of the script calling is: `python3 quantifyIntensities.py --dir /mnt/data2/varrone/elisa_lymphomoids/Quantification/ --sample_names HLS16_01acq01 HLS16_01acq02 HSL16_29acq01`.
+
 
 ## Step 5 - (downstream analyses)
 
