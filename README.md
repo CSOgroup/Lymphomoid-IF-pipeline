@@ -6,7 +6,7 @@ A good starting point is to load and visualize your IF image on QuPath. You can 
 
 QuPath is organized into “projects”. When you create a new project, you will be asked to allocate an empty folder to it. Then, you can add images to the project. It is fast to switch between images of the same project, and you will see the thumbnails of all of them at the same time; conversely, to inspect the images of a different project you will have to close the current one and open the other. This can affect the way you want to organize your project(s): I recommend to put related images into the same project (e.g. all images of the same patient, or of the same treatment). It is in principle also possible to store all images of all patients in the same project, but it probably would become messy.
 
-When loading a .vsi raw image file, sometimes the same file will contain more than one image (different acquisitions of the same sample, or even different samples). Discard those that are unusable (e.g. out of focus, or with too little tissue and only fatty holes). Instead, for the good images, change their QuPath image name into a meaningful one (sometimes the name of the raw file is just e.g. “Image_10.vsi” - you might want to change it into e.g. “HLS23_#23_multiplex”).  It is advisable to rename them in a clear and consistent way.
+When loading a .vsi raw image file, sometimes the same file will contain more than one image (different acquisitions of the same sample, or even different samples). Discard those that are unusable (e.g. out of focus, or with too little tissue and only fatty holes). Instead, for the good images, change their QuPath image name into a meaningful one (sometimes the name of the raw file is just e.g. “Image_10.vsi” - you might want to change it into e.g. “HLS23_s12_acq01”, which mentions the Human Lymphoma Sample number, the paraffin section, and the acquisition ID of that section).  It is advisable to rename them in a clear and consistent way.
 
 Now you can explore the loaded image. If needed, set its type into "Fluorescence". You can change brightness, contrast and show/hide the different channels, corresponding to the different stained proteins. Sometimes it is useful to look at a single channel in grayscale mode. 
 
@@ -26,7 +26,7 @@ In this step, you will draw and save the coordinates of the boundaries of all ly
 3. In the script, set the absolute path to your desired output directory (_OutDir_) and the image name (_ImageName_)
 4. For each boundary:
    * Select the boundary itself (double click - a selected boundary is displayed in yellow)
-   * Set the lymphomoid name in the script (_LymphomoidName_)
+   * Set the lymphomoid name in the script (_LymphomoidName_). Be careful in this passage: if the same lymphomoid appears in different images, they should all have the same _LymphomoidName_. In this way, different acquisitions (encoded with different _ImageName_) will be treated as replicated measurements of the same lymphomoid in the downstream analyses
    * Run the script
 
 
@@ -53,63 +53,7 @@ In this step, you will tune the thresholds for each channel to classify a cell a
 7. If you wish, repeat all the steps from 1 to 6 drawing a different rectangular region, to test whether your thresholds would stay the same or not
 8. At each run, the script is saving and overwriting the output file with all the thresholds. Thus, your last run should be done with all the thresholds already tuned, as the final output file will be saved with those. If you want to run the script without saving the file, comment out the _Saving_ section
 
-## Step 4 - Nuclei detection and cell-level quantification with DeepCell (work in progress)
-DeepCell is a nuclei and cell segmentation software that is more robust to different levels of marker intensity and, thus, gives better results when the intensity of DAPI varies dramatically in the same sample.
-
-The whole process of segmenting the cells and extract the intensity of the markers is fairly automatized. The crucial step is to setup the input directories and files properly.
-
-
-
-### Setup of the input files
-The software is already installed on the uporicchiosrv1 server, so it's strongly suggested to setup the directories on the server.
-
-Create a directory on the server that will contain the input and output files. Do not use the same directory as the one containing the original .vsi images because you will need to convert those images into another format.
-
-Mount the newly created directory to your local machine (e.g., _HLS\_Quantification_). If you are using _sshfs_ on a Mac, add the `-o defer_permissions` parameter to avoid problems of permission denied when saving files.
-
-Then, create a new directory inside _HLS\_Quantification_ for each of the images. And inside oeach of these, create a directory called _registration_.
-
-For example:
-
-```bash
-HLS_Quantification
-├── HLS25_7
-│   ├── registration
-├── HLS25_41acq01
-│   ├── registration
-├── HLS25_41acq03
-│   ├── registration
-...
-```
-
-### VSI to .OME.TIF format conversion
-In this step we will convert the images from the .vsi to the .ome.tif format.
-For each of the images:
-1. Open the image in QuPath
-2. Go to File -> Export images... -> Original pixels
-3. Select the OME TIFF format and a downsample factor of 1.0
-4. Select as output path the registration folder of the corresponding image in _HLS\_Quantification_. It is suggested (but not required) to use a filename the same name chosen for the image.
-
-The directory structure should now look like:
-```bash
-HLS_Quantification
-├── HLS25_7
-│   ├── registration
-│   │   ├──HLS25_7.ome.tif
-├── HLS25_41acq01
-│   ├── registration
-│   │   ├──HLS25_41acq01.ome.tif
-├── HLS25_41acq03
-│   ├── registration
-│   │   ├──HLS25_41acq03.ome.tif
-...
-```
-
-WARNING: the export may take a while depending on the size of the image and the network speed (tens of minutes). QuPath may not respond during that time.
-For this reason we are trying to setup a semi-automatic export script directly from the server.
+## Step 4 - Nuclei detection and cell-level quantification with DeepCell
 
 ## Step 5 - (downstream analyses)
-
-# To-do
-
 
