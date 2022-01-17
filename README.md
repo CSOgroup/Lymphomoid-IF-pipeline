@@ -56,14 +56,13 @@ In this step, you will tune the thresholds for each channel to classify a cell a
 ## Step 4 - Nuclei detection and cell-level quantification with DeepCell (work in progress)
 DeepCell is a nuclei and cell segmentation software that is more robust to different levels of marker intensity and, thus, gives better results when the intensity of DAPI varies dramatically in the same sample.
 
-The whole process of segmenting the cells and extract the intensity of the markers is fairly automatized. The crucial step is to setup the input directories and files properly.
+The whole process of detecting cells and extract the intensity of the markers is fairly automatized. The crucial step is to setup the input directories and files properly.
 
 
+### Setup of the input directories
+Given that the software is already installed on the uporicchiosrv1 server, and the process requires quite heavy computation resources, it's strongly suggested to setup the directories on the server.
 
-### Setup of the input files
-The software is already installed on the uporicchiosrv1 server, so it's strongly suggested to setup the directories on the server.
-
-Create a directory on the server that will contain the input and output files. Do not use the same directory as the one containing the original .vsi images because you will need to convert those images into another format.
+Create a directory on the server that will contain the input and output folders. Do not use the same directory as the one containing the original .vsi images because you will need to convert those images into another format.
 
 Mount the newly created directory to your local machine (e.g., _HLS\_Quantification_). If you are using _sshfs_ on a Mac, add the `-o defer_permissions` parameter to avoid problems of permission denied when saving files.
 
@@ -89,7 +88,7 @@ For each of the images:
 2. A popup called "BioFormats Import Options" will open. Press OK without any modification.
 3. Another popup with a list of images will appear.<br><p align="center"> <img src="img/fiji_series_1.png" alt="Fiji series" width="200"/></p><br>
 4. The first image will be automatically selected. Deselect it.
-5. Scrolling down you will start to see acquisitions of the lymphomoids and each acquisition will be repeated many times. Each replicate is the same acquisition at different resolutions. Select only the images that correspond to the highest resolutions, which usually have _20x_NUMBER_ in their name. IMPORTANT: do not select images that were discarded in QuPath in Step 1. It may take a while (5-10 minutes) to open them. Another popup with a list of images will appear.<br><p align="center"> <img src="img/fiji_series_2.png" alt="Fiji series" width="200"/></p><br>
+5. Scrolling down you will start to see acquisitions of the lymphomoids and each acquisition will be repeated many times. Each replicate is the same acquisition at different resolutions. Select only the images that correspond to the highest resolution, which usually have _20x\_NUMBER_ in their name. IMPORTANT: do not select images that were discarded in QuPath in Step 1. It may take a while (5-10 minutes) to open them. <br><p align="center"> <img src="img/fiji_series_2.png" alt="Fiji series" width="200"/></p><br>
 6. After the images are loaded in ImageJ/Fiji, for each one of them individually, click on File -> Save as -> Tiff... and select the registration folder corresponding to the selected image. It's strongly suggested to use as name of the file, the same name of the corresponding folder (see next directory structure...).
 
 The directory structure should now look like:
@@ -106,6 +105,23 @@ HLS_Quantification
 │   │   ├──HLS25_41acq03.tif
 ...
 ```
+
+### Cell detection (i.e. segmentation)
+The cell detection script require few Python packages for basic file processing. They are all already installed as a Python virtual environment in _/mnt/data2/shared/Lymphomoid-IF-software/Lymphomoid-IF-venv/_.
+To be able to access the packages you need to activate the environment using:
+
+`source /mnt/data2/shared/Lymphomoid-IF-software/Lymphomoid-IF-venv/bin/activate`
+
+Then you need to run the _cellDetection.py_ script, with the following parameters:
+- `--sample_names`: the name of the images for cell detection, it could be 1 or many, separated by a whitespace.
+- `--dir`: the absolute path of the _HLS\_Quantification_ directory
+
+Some other parameters may be required in case of non-standard uses of the pipeline, so they can usually be ignored:
+- `--deepcell_path`: the absolute path to the Singularity image of DeepCell. The default is _/mnt/data2/shared/Lymphomoid-IF-software/deepcell.sif_ where is already present.
+- `--nucleus_channel`: the index in the tif file of the channel associated to the nuclear marker (e.g. DAPI). The default is `0`.
+- `--membrane_channels`: the indices in the tif file of the channels asscoiated to membrane markers. The default is `1 3 4 5` because the channel placed at index 2 is KI67, which is a nuclear (i.e. not membrane) marker.
+
+Thus, an example of the script calling is: `python3 cellDetection.py --dir /mnt/data2/varrone/elisa_lymphomoids/Quantification/ --sample_names HLS16_01acq01 HLS16_01acq02 HSL16_29acq01`
 
 ## Step 5 - (downstream analyses)
 
