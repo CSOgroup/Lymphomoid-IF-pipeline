@@ -12,7 +12,7 @@ selectAnnotations();
 
 // ----------- Input ----------- 
 OutDir = "/Users/daniele/Mounted_folder_daniele_ndata/elisa_lymphomoids/Processed/Pipeline_test/" // Absolute path to your desired output directory
-ImageName = "HLS33_21acq03"
+ImageName = "HLS33_s21_acq03"
 DAPI_thresh = 200
 FITC_thresh = 300
 CY5_thresh = 100
