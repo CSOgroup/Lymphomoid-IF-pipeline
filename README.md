@@ -115,18 +115,18 @@ To be able to access the packages you need to activate the environment using:
 
 Then you need to run the _cellDetection.py_ script, with the following required parameters:
 - `--sample_names`: the name of the images for cell detection, it could be 1 or many, separated by a whitespace.
-- `--dir`: the absolute path of the _HLS\_Quantification_ directory
+- `--dir`: the path of the _HLS\_Quantification_ directory
+- `--channel_info_path`: the path to the .txt or .tsv file containing information on the image channels. The values must be separated by tabs. In particular, the file must contain a _Channel\_name_ and a _Cellular\_location_ (Nucleus or Cytoplasm) column.
 
 <details>
 <summary>Some other parameters may be required in case of non-standard uses of the pipeline, so they can usually be ignored</summary>
 
 * `--deepcell_path`: the absolute path to the Singularity image of DeepCell. The default is `/mnt/data2/shared/Lymphomoid-IF-software/deepcell.sif` where is already present.
-* `--nucleus_channel`: the index in the tif file of the channel associated to the nuclear marker (e.g. DAPI). The default is `0`.
-* `--membrane_channels`: the indices in the tif file of the channels asscoiated to membrane markers. The default is `1 3 4 5` because the channel placed at index 2 is KI67, which is a nuclear (i.e. not membrane) marker.
+* `--nucleus_channel`: the name of the channel associated to the nuclear marker (e.g. DAPI). The default is `DAPI`.
 
 </details>
 
-An example of the script calling is: `python3 cellDetection.py --dir /mnt/data2/varrone/elisa_lymphomoids/Quantification/ --sample_names HLS16_01acq01 HLS16_01acq02 HSL16_29acq01`
+An example of the script calling is: `python3 cellDetection.py --dir /mnt/data2/varrone/elisa_lymphomoids/Quantification/ --sample_names HLS16_01acq01 HLS16_01acq02 HSL16_29acq01 --channel_info_path /mnt/data2/varrone/elisa_lymphomoids/mouse_channels.txt`
 
 A lot of warning messages will appear, but they are normal. As long as the message `Channels extracted successfully.` appears, the software will have worked successfully. 
 
@@ -145,7 +145,6 @@ Then, run the _quantifyIntensities.py_ script, with the same required parameters
 <summary>Parameters for non-standard uses of the pipeline</summary>
 
 * `--nextflow_dir`: path to the Nextflow software. The default is `/mnt/data2/shared/Lymphomoid-IF-software/nextflow` where is already present.
-* `--markers`: the ordered name of the markers separated by a whitespace. The default is `DAPI CD20 Ki67 CD4 CD8 CD68`
 
 </details>
 
