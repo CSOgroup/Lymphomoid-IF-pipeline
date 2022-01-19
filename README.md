@@ -89,20 +89,21 @@ For each of the images:
 3. Another popup with a list of images will appear.<br><p align="center"> <img src="img/fiji_series_1.png" alt="Fiji series" width="200"/></p><br>
 4. The first image will be automatically selected. Deselect it.
 5. Scrolling down you will start to see acquisitions of the lymphomoids and each acquisition will be repeated many times. Each replicate is the same acquisition at different resolutions. Select only the images that correspond to the highest resolution, which usually have _20x\_NUMBER_ in their name. IMPORTANT: do not select images that were discarded in QuPath in Step 1. It may take a while (5-10 minutes) to open them. <br><p align="center"> <img src="img/fiji_series_2.png" alt="Fiji series" width="200"/></p><br>
-6. After the images are loaded in ImageJ/Fiji, for each one of them individually, click on File -> Save as -> Tiff... and select the registration folder corresponding to the selected image. It's strongly suggested to use as name of the file, the same name of the corresponding folder (see next directory structure...).
+6. After the images are loaded in ImageJ/Fiji, for each one of them individually, click on File -> Save as -> OME-TIFF... (it's one of the last options) and select the registration folder corresponding to the selected image. It's strongly suggested to use as name of the file, the same name of the corresponding folder (see next directory structure...). IMPORTANT: rember to add ".ome.tif" at the end of the filename or you will receive an error.
+7. Another popup will open up. Leave everything unselected and press OK. <br><p align="center"> <img src="img/fiji_saving.png" alt="Fiji series" width="200"/></p><br>
 
 The directory structure should now look like:
 ```bash
 HLS_Quantification
 ├── HLS25_7
 │   ├── registration
-│   │   ├──HLS25_7.tif
+│   │   ├──HLS25_7.ome.tif
 ├── HLS25_41acq01
 │   ├── registration
-│   │   ├──HLS25_41acq01.tif
+│   │   ├──HLS25_41acq01.ome.tif
 ├── HLS25_41acq03
 │   ├── registration
-│   │   ├──HLS25_41acq03.tif
+│   │   ├──HLS25_41acq03.ome.tif
 ...
 ```
 
