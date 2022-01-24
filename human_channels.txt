@@ -1,0 +1,7 @@
+Channel_name	Cellular_location	Antibody	Marker_of	Fluorochrome	Species
+DAPI	Nucleus	DAPI	Nucleus	DAPI	Human
+FITC	Cytoplasm	CD20	B cells	FAM	Human
+CFP	Cytoplasm	CD4	CD4	DCC	Human
+RFP	Cytoplasm	CD8	CD8	R6G	Human
+CY5	Nucleus	Ki67	Proliferation	Cy5	Human
+Alexa 594	Cytoplasm	CD68	Macrophages	R610	Human
