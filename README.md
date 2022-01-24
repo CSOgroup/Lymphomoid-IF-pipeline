@@ -126,7 +126,7 @@ Then you need to run the _cellDetection.py_ script, with the following required 
 
 </details>
 
-An example of the script calling is: `python3 cellDetection.py --dir /mnt/data2/varrone/elisa_lymphomoids/Quantification/ --sample_names HLS16_01acq01 HLS16_01acq02 HSL16_29acq01 --channel_info_path /mnt/data2/varrone/elisa_lymphomoids/mouse_channels.txt`
+An example of the script calling is: `python3 cellDetection.py --dir /mnt/data2/varrone/elisa_lymphomoids/HLS_Quantification/ --sample_names HLS25_7 HLS25_41acq01 HLS25_41acq03 --channel_info_path /mnt/data2/varrone/elisa_lymphomoids/mouse_channels.txt`
 
 A lot of warning messages will appear, but they are normal. As long as the message `Channels extracted successfully.` appears, the software will have worked successfully. 
 
@@ -148,8 +148,16 @@ Then, run the _quantifyIntensities.py_ script, with the same required parameters
 
 </details>
 
-An example of the script calling is: `python3 quantifyIntensities.py --dir /mnt/data2/varrone/elisa_lymphomoids/Quantification/ --sample_names HLS16_01acq01 HLS16_01acq02 HSL16_29acq01`.
+An example of the script calling is: `python3 quantifyIntensities.py --dir /mnt/data2/varrone/elisa_lymphomoids/HLS_Quantification/ --sample_names HLS25_7 HLS25_41acq01 HLS25_41acq03`.
 
+### Optional: downloading the software
+As previously mentioned, the directory containing all the necessary software is already present in the uporicchiosrv1 server. 
+
+If you want to download or update the four software required:
+* Virtual Environment: the Python packages required for running the pipeline are listed in the file _requirements.txt_. If you want to install the packages in your current virtual environment you can run `pip install -r requirements.txt`.
+* DeepCell: the image for Singularity can be downloaded running `singularity pull deepcell.sif docker://vanvalenlab/deepcell-applications:latest`. Current version: 0.3.1.
+* Nextflow: select the directory where ypu want to download nextflow and run `curl -s https://get.nextflow.io | bash`. For more information visit the [website](https://nextflow.io). Current version: 21.10.6.5660.
+* MCMICRO: you can get the latest version of MCMICRO by running `nextflow pull labsyspharm/mcmicro`. For more information visit the [website](https://mcmicro.org). Current version: Github revision 46abd97bc0.
 
 ## Step 5 - (downstream analyses)
 
