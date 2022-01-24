@@ -17,20 +17,14 @@ parser.add_argument('--nucleus_channel', type=str, default='DAPI')
 args = parser.parse_args()
 
 channels_info = pd.read_csv(args.channel_info_path, delimiter='\t')
-
 channels_info.index = channels_info['Channel_name']
 channels_info['Order'] = -np.ones(channels_info.shape[0], dtype=int)
-
-
 
 for filename in tqdm(args.sample_names):
     name = filename.replace('.ome.tif', '')
     print(f'Processing sample {name}...')
 
-    
-
     output_dir = os.path.join(args.dir, name)
-    #os.makedirs(output_dir, exist_ok=True)
 
     image_path = os.path.join(output_dir, 'registration', f'{name}.ome.tif')
     channels_dir = os.path.join(output_dir, 'channels')
@@ -63,5 +57,7 @@ for filename in tqdm(args.sample_names):
         result = os.popen(f"singularity exec --env TF_CPP_MIN_LOG_LEVEL=2 --cleanenv --no-home --bind {output_dir}:/data --nv {args.deepcell_path} /usr/local/bin/python /usr/src/app/run_app.py mesmer --nuclear-image {os.path.join('/data', 'channels', f'{name}_nucleus.tif')} --membrane-image {os.path.join('/data', 'channels', f'{name}_membrane.tif')} --output-directory {os.path.join('/data', 'segmentation', 'tmp')} --output-name {name}_whole_cell_mask.tif --compartment whole-cell --squeeze").read()
 
         print(f'Segmentation completed for sample {name}')
+
+        shutil.rmtree(channels_dir)
 print()
 print('Channels extracted successfully.')
