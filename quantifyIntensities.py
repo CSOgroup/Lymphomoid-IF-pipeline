@@ -8,16 +8,20 @@ import shutil
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--sample_names', type=str, default=None)
-parser.add_argument('--dir', type=str, default='/mnt/ndata/varrone/Data/graviton/HLS')
+parser.add_argument('--sample_names', type=str, nargs='+', required=True)
+parser.add_argument('--dir', type=str, required=True)
+parser.add_argument('--channel_info_path', type=str, required=True)
 parser.add_argument('--nextflow_dir', type=str, default='/mnt/data2/shared/Lymphomoid-IF-software/nextflow')
-parser.add_argument('--markers', type=str, nargs='*', default=['DAPI', 'CD20', 'Ki67', 'CD4', 'CD8', 'CD68'])
 
 args = parser.parse_args()
 
-filenames = [args.sample_name] if args.sample_name else os.listdir(args.masks_dir)
+channels_info = pd.read_csv(args.channel_info_path, delimiter='\t')
+channels_info.index = channels_info['Channel_name']
+nuclear_markers = channels_info[channels_info['Cellular_location'].str.lower() == 'nucleus']['Channel_name']
+membrane_markers = channels_info[channels_info['Cellular_location'].str.lower() == 'cytoplasm']['Channel_name']
 
-for name in tqdm(filenames):
+
+for name in tqdm(args.sample_names):
     print(name)
     output_dir = os.path.join(args.dir, name)
     
@@ -26,15 +30,18 @@ for name in tqdm(filenames):
     if not os.path.exists(os.path.join(masks_dir, f'mesmer-{name}', f'cytoplasm.tif')) or \
         not os.path.exists(os.path.join(masks_dir, f'mesmer-{name}', f'nuclei.tif')):
 
+        print('Loading segmentation masks...')
         mask_nuclei = tifffile.imread(os.path.join(masks_dir, 'tmp', f'{name}_nuclear_mask.tif'))
         mask_whole_cell = tifffile.imread(os.path.join(masks_dir, 'tmp', f'{name}_whole_cell_mask.tif'))
 
         # Remove the nucleus mask from the whole-cell mask to obtain the cytoplasm
+        print('Generating cytoplasm mask...')
         mask_cytoplasm = mask_whole_cell*~(mask_nuclei > 0)
 
         # Select nucleus masks where there is a match with the whole cell masks
         mask_nuclei = mask_whole_cell*(mask_nuclei > 0)
         
+        print('Saving final masks...')
         os.makedirs(os.path.join(masks_dir, f'mesmer-{name}'), exist_ok=True)
         tifffile.imsave(os.path.join(masks_dir, f'mesmer-{name}', f'cytoplasm.tif'), mask_cytoplasm)
         tifffile.imsave(os.path.join(masks_dir, f'mesmer-{name}', f'nuclei.tif'), mask_nuclei)
@@ -44,9 +51,20 @@ for name in tqdm(filenames):
     
     # Extract the mean intensity of each marker from the mask of each cell with MCMICRO
     if not os.path.exists(os.path.join(output_dir, 'quantification')):
-        markers = pd.DataFrame(np.column_stack((np.zeros(len(args.markers), dtype=int), args.markers)), columns=['cycle', 'marker_name'])
-        markers.to_csv(os.path.join(output_dir, 'markers.csv'), index=False)
-
         os.chdir(args.dir)
-        result = os.popen(f"{args.nextflow_dir} run labsyspharm/mcmicro --profile O2 --in {name} --start-at quantification --stop-at quantification --probability-maps mesmer --quant-opts '--masks nuclei.tif cytoplasm.tif'").read()
-        print(result)
+        print('Start quantification...')
+        result = os.popen(f"{args.nextflow_dir} run labsyspharm/mcmicro --profile singularity --in {name} --start-at quantification --stop-at quantification --probability-maps mesmer --quant-opts '--masks nuclei.tif cytoplasm.tif'").read()
+
+        sample_nuclei = pd.read_csv(os.path.join(output_dir, 'quantification', f'mesmer-{name}_nuclei.csv'))
+        sample_nuclei = sample_nuclei.loc[:, ~sample_nuclei.columns.isin(membrane_markers)]
+        
+        sample_cytoplasm = pd.read_csv(os.path.join(output_dir, 'quantification', f'mesmer-{name}_cytoplasm.csv'))
+        sample_cytoplasm = sample_cytoplasm.loc[:, ~sample_cytoplasm.columns.isin(nuclear_markers)]
+
+        sample = pd.merge(sample_nuclei, sample_cytoplasm, on='CellID', how='left', suffixes=("_nucleus", "_cytoplasm"))
+        sample = sample.rename(columns={row['Channel_name']: row['Antibody'] for _, row in channels_info.iterrows()})
+        sample.index = sample.index.astype(str)
+        sample.to_csv(os.path.join(output_dir, 'quantification', f'mesmer-{name}_merged.csv'), index=False)
+
+
+
