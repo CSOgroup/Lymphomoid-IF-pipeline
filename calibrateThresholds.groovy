@@ -35,9 +35,9 @@ for (int line in 1..(fileArray.size()-1)){
 // ----------- Calibration ----------- 
 // DAPI
 runPlugin('qupath.imagej.detect.cells.WatershedCellDetection', '{"detectionImage": "DAPI",  "requestedPixelSizeMicrons": 0.5,  "backgroundRadiusMicrons": 15.0,  "medianRadiusMicrons": 0.0,  "sigmaMicrons": 1.0,  "minAreaMicrons": 5.0,  "maxAreaMicrons": 100.0,  "threshold": '+DAPI_thresh+',  "watershedPostProcess": true,  "cellExpansionMicrons": 2.5,  "includeNuclei": true,  "smoothBoundaries": true,  "makeMeasurements": true}');
- // FITC
- print('FITC: detecting '+channel_antibody_map['FITC']+' in the '+channel_celllocation_map['FITC'])
- setCellIntensityClassifications(channel_celllocation_map['FITC']+": FITC mean", FITC_thresh)
+ // // FITC
+ // print('FITC: detecting '+channel_antibody_map['FITC']+' in the '+channel_celllocation_map['FITC'])
+ // setCellIntensityClassifications(channel_celllocation_map['FITC']+": FITC mean", FITC_thresh)
 // // CY5
 // print('CY5: detecting '+channel_antibody_map['CY5']+' in the '+channel_celllocation_map['CY5'])
 // setCellIntensityClassifications(channel_celllocation_map['CY5']+": CY5 mean", CY5_thresh)
