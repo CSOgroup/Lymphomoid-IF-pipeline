@@ -11,8 +11,8 @@ double pixelDimMicrons = server.getPixelCalibration().getAveragedPixelSizeMicron
 
 // ----------- Input ----------- 
 MainDir = "/Users/daniele/Mounted_folder_daniele_ndata/elisa_lymphomoids/Processed/Pipeline_test/" // Absolute path to your main directory
-ImageName = "HLS01_s02_acq03"
-LymphomoidName = "Pembroluzimab02" // Avoid underscores for LymphomoidName
+ImageName = "HLS09_s01_acq01"
+LymphomoidName = "Ibrutinib02" // Avoid underscores for LymphomoidName
 // -----------------------------
 
 // ------ Saving boundary ------ 
