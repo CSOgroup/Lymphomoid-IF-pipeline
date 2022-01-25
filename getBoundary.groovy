@@ -12,7 +12,7 @@ double pixelDimMicrons = server.getPixelCalibration().getAveragedPixelSizeMicron
 // ----------- Input ----------- 
 OutDir = "/Users/daniele/Mounted_folder_daniele_ndata/elisa_lymphomoids/Processed/Pipeline_test/" // Absolute path to your desired output directory
 ImageName = "HLS33_s21_acq03"
-LymphomoidName = "Pembroluzimab01"
+LymphomoidName = "Pembroluzimab01" // Avoid underscores for LymphomoidName
 // -----------------------------
 
 OutFile = ImageName+"_"+LymphomoidName+"_Boundary.txt" // Output file name

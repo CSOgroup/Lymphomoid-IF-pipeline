@@ -18,7 +18,7 @@ In this step, you will draw and save the coordinates of the boundaries of all ly
 3. In the script, set the absolute path to your desired output directory (_OutDir_) and the image name (_ImageName_)
 4. For each boundary:
    * Select the boundary itself (double click - a selected boundary is displayed in yellow)
-   * Set the lymphomoid name in the script (_LymphomoidName_). Be careful in this passage: if the same lymphomoid appears in different images, they should all have the same _LymphomoidName_. In this way, different acquisitions (encoded with different _ImageName_'s) will be treated as replicated measurements of the same lymphomoid in the downstream analyses
+   * Set the lymphomoid name in the script (_LymphomoidName_), avoid using underscores. Be careful in this passage: if the same lymphomoid appears in different images, they should all have the same _LymphomoidName_. In this way, different acquisitions (encoded with different _ImageName_'s) will be treated as replicated measurements of the same lymphomoid in the downstream analyses
    * Run the script
 
 
