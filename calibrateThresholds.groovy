@@ -8,7 +8,6 @@ import qupath.lib.gui.scripting.QPEx
 
 def imageData = QPEx.getCurrentImageData()
 clearDetections();
-selectAnnotations();
 
 // ----------- Input ----------- 
 OutDir = "/Users/daniele/Mounted_folder_daniele_ndata/elisa_lymphomoids/Processed/Pipeline_test/" // Absolute path to your desired output directory

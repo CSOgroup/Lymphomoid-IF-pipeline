@@ -24,7 +24,7 @@ In this step, you will draw and save the coordinates of the boundaries of all ly
 
 ## Step 3 - Fluorescence threshold calibration on the image
 In this step, you will tune the thresholds for each channel to classify a cell as "positive" or not for each of the proteins. To do so, a script will automatically detect nuclei and classify cells according to the thresholds that you give it as input (for DAPI and Ki67, cells will be classified according to the fluorescence levels inside the nuclei; for all other markers, the fluorescence levels will be thresholded in the cytoplasmic regions). The script also takes as input a configuration table that stores the association between channels, antibodies and cellular location (e.g. FITC - B220 - Cytoplasm); the two provided configuration tables _human_channels.txt_ and _mouse_channels.txt_ should work in the majority of the cases, but check that they are correct before running the script and create new ones with the same structure in case it is needed. Then, tune the threshold of each channel until you are satisfied with the classification. Finally, the script stores all the tuned thresholds in a text file, that will be used in the downstream analyses. Here are the detailed (sub)steps:
-1. Draw a rectangular region that seems to contain cells positive for each of the channels
+1. Draw a rectangular region that seems to contain cells positive for each of the channels, and select it (you can also use an existing lymphomoid boundary)
 2. Open _calibrateThresholds.groovy_ script in QuPath script editor
 3. In the script, set the absolute path to your desired output directory (_OutDir_) and configuration table (_ConfigTable_), and the image name (_ImageName_) in the _Input_ section. These have to be the same as for the boundary drawing (Step 2, point 3).
 4. Tune the DAPI threshold first:
@@ -151,5 +151,5 @@ If you want to download or update the four software required:
 * Nextflow: select the directory where ypu want to download nextflow and run `curl -s https://get.nextflow.io | bash`. For more information visit the [website](https://nextflow.io). Current version: 21.10.6.5660.
 * MCMICRO: you can get the latest version of MCMICRO by running `nextflow pull labsyspharm/mcmicro`. For more information visit the [website](https://mcmicro.org). Current version: Github revision 46abd97bc0.
 
-## Step 5 - (downstream analyses)
+## Step 5 - Classify cells and downstream analyses
 
