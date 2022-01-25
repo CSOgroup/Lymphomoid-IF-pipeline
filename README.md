@@ -15,7 +15,7 @@ Now you can explore the loaded image. If needed, set its type into "Fluorescence
 In this step, you will draw and save the coordinates of the boundaries of all lymphomoids present in the image, so that they will be processed separately in the downstream analyses, and pieces of tissue scattered around the gel will be discarded.
 1. For each lymphomoid, draw a closed boundary with QuPath polygon tool
 2. Open _getBoundary.groovy_ script in QuPath script editor (Automate -> Show script editor)
-3. In the script, set the absolute path to your desired output directory (_OutDir_) and the image name (_ImageName_)
+3. In the script, set the absolute path to your desired main directory for all pipeline input/output files (_MainDir_) and the image name (_ImageName_)
 4. For each boundary:
    * Select the boundary itself (double click - a selected boundary is displayed in yellow)
    * Set the lymphomoid name in the script (_LymphomoidName_), avoid using underscores. Be careful in this passage: if the same lymphomoid appears in different images, they should all have the same _LymphomoidName_. In this way, different acquisitions (encoded with different _ImageName_'s) will be treated as replicated measurements of the same lymphomoid in the downstream analyses
@@ -26,7 +26,7 @@ In this step, you will draw and save the coordinates of the boundaries of all ly
 In this step, you will tune the thresholds for each channel to classify a cell as "positive" or not for each of the proteins. To do so, a script will automatically detect nuclei and classify cells according to the thresholds that you give it as input (for DAPI and Ki67, cells will be classified according to the fluorescence levels inside the nuclei; for all other markers, the fluorescence levels will be thresholded in the cytoplasmic regions). The script also takes as input a configuration table that stores the association between channels, antibodies and cellular location (e.g. FITC - B220 - Cytoplasm); the two provided configuration tables _human_channels.txt_ and _mouse_channels.txt_ should work in the majority of the cases, but check that they are correct before running the script and create new ones with the same structure in case it is needed. Then, tune the threshold of each channel until you are satisfied with the classification. Finally, the script stores all the tuned thresholds in a text file, that will be used in the downstream analyses. Here are the detailed (sub)steps:
 1. Draw a rectangular region that seems to contain cells positive for each of the channels, and select it (you can also use an existing lymphomoid boundary)
 2. Open _calibrateThresholds.groovy_ script in QuPath script editor
-3. In the script, set the absolute path to your desired output directory (_OutDir_) and configuration table (_ConfigTable_), and the image name (_ImageName_) in the _Input_ section. These have to be the same as for the boundary drawing (Step 2, point 3).
+3. In the script, set the absolute path to your desired main directory (_MainDir_) and configuration table (_ConfigTable_), and the image name (_ImageName_) in the _Input_ section. These have to be the same as for the boundary drawing (Step 2, point 3).
 4. Tune the DAPI threshold first:
    * In the 'Brigthness & contrast' menu, turn off all channels except for DAPI, and set it to grayscale
    * Hover the cursor on the nuclei to have an idea on what might be the threshold

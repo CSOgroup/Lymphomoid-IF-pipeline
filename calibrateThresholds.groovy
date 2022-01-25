@@ -10,12 +10,12 @@ def imageData = QPEx.getCurrentImageData()
 clearDetections();
 
 // ----------- Input ----------- 
-OutDir = "/Users/daniele/Mounted_folder_daniele_ndata/elisa_lymphomoids/Processed/Pipeline_test/" // Absolute path to your desired output directory
-ConfigTable = "/Users/daniele/Mounted_folder_daniele_ndata/elisa_lymphomoids/Scripts/Lymphomoid-IF-pipeline/mouse_channels.txt" // Configuration table as 'mouse_channels.txt' or 'human_channels.txt' 
-ImageName = "HLS33_s21_acq03"
+MainDir = "/Users/daniele/Mounted_folder_daniele_ndata/elisa_lymphomoids/Processed/Pipeline_test/" // Absolute path to your main directory
+ConfigTable = "/Users/daniele/Mounted_folder_daniele_ndata/elisa_lymphomoids/Scripts/Lymphomoid-IF-pipeline/human_channels.txt" // Configuration table as 'mouse_channels.txt' or 'human_channels.txt' 
+ImageName = "HLS01_s02_acq03"
 DAPI_thresh = 200
 FITC_thresh = 300
-CY5_thresh = 100
+CY5_thresh = 110
 CFP_thresh = 300
 RFP_thresh = 300
 Alexa_thresh = 300
@@ -54,8 +54,9 @@ runPlugin('qupath.imagej.detect.cells.WatershedCellDetection', '{"detectionImage
 
 
 // ----------- Saving ----------- 
- File file = new File(OutDir+ImageName+"_AllThresholds.txt")
- file.write "DAPI_thresh "+DAPI_thresh+"\n"+"FITC_thresh "+FITC_thresh+"\n"+"CY5_thresh "+CY5_thresh+"\n"+"CFP_thresh "+CFP_thresh+"\n"+"RFP_thresh "+RFP_thresh+"\n"+"Alexa_thresh "+Alexa_thresh+"\n"
+new File(MainDir+"Calibrated_thresholds/").mkdirs()
+File file = new File(MainDir+"Calibrated_thresholds/"+ImageName+"_AllThresholds.txt")
+file.write "DAPI_thresh "+DAPI_thresh+"\n"+"FITC_thresh "+FITC_thresh+"\n"+"CY5_thresh "+CY5_thresh+"\n"+"CFP_thresh "+CFP_thresh+"\n"+"RFP_thresh "+RFP_thresh+"\n"+"Alexa_thresh "+Alexa_thresh+"\n"
 // ------------------------------ 
 
 println "Done"
