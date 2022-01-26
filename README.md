@@ -152,4 +152,29 @@ If you want to download or update the four software required:
 * MCMICRO: you can get the latest version of MCMICRO by running `nextflow pull labsyspharm/mcmicro`. For more information visit the [website](https://mcmicro.org). Current version: Github revision 46abd97bc0.
 
 ## Step 5 - Classify cells and downstream analyses
+In this step we will take quantification performed at step 4 and classify the cells according to the thresholds we calibrated at step 3. Each detected cell has a value for each of the cytoplasmic markers; if for a given cell they are all below the thresholds, that cell will be assigned to "otherCell", otherwise it will be assigned to the marker with the highest difference between the cytoplasmic intensity of that marker and its threshold. This means that in the current implementation a cell can be assigned to (or 'positive for') at most one marker. Additionally, cells will be classified as proliferating or not according to whether the Ki67 intensity is above or below its calibrated threshold. The script _ClassifyCells_Analyses.R_ performs this cell classification, downstream analyses and plotting for all lymphomoids provided as input. In detail:
+1. Open _ClassifyCells_Analyses.R_ with a text editor or RStudio
+2. Set up the input:
+   * MainDir: your main directory, same as for the previous steps
+   * ConfigTable: your configuration table, same as for the previous steps
+   * Lymphomoids_to_process: set to "all" if you want all previously drawn lymphomoids to be processed, otherwise specify a subset of them as a character vector
+   * Optionally, you can change some of the plotting parameters
+3. If they are not already installed, install R packages `sp`, `ggplot2` and `reshape2`
+4. Run the script
+The script will generate the following output under MainDir (all folders are created automatically):
+* `Classified_cells_tables/Table_<ImageName>_<LymphomoidName>_AllCells.txt` containing, for each cell (rows), information on marker intensities, centroid coordinates in micrometers, assigned marker/antibody and wheter the cell is proliferating
+* `Digital_IF_images/`
+   - `IFimage_<ImageName>_<LymphomoidName>_all.pdf` digitalized image with cells rendered as simple dots, color-coded by their assigned marker, and a red contour for the lymphomoid boundary
+   - `IFimage_<ImageName>_<LymphomoidName>_NoOtherCells_OnlyInLymphomoid.pdf` same but excluding otherCells and showing only cells inside the lymphomoid
+   - `IFimage_<ImageName>_<LymphomoidName>_NoOtherCells_OnlyInLymphomoid_OnlyProliferating.pdf` same but showing only proliferating cells inside the lymphomoid
+* `*LymphomoidLevel*` files contain results summarized at the lymphomoid level, i.e. if two images contained the same lymphomoid (having the same name), their cell counts were averaged
+   - `SummaryTable_LymphomoidLevel_AllCells.RData/.txt` table containing for each lymphomoid (rows), total cell counts for each marker, total counts of proliferating cells for each marker, and total number of cells detected in the lymphomoid
+   - `LymphomoidLevel_CellTypeProportions_StackedBarplot.pdf/.txt` plot and table of cell type proportions across lymphomoids
+   - `LymphomoidLevel_CellTypeProportions_ExclOtherCells_StackedBarplot.pdf/.txt` same as above but excluding otherCells
+   - `LymphomoidLevel_ProlifVsNot_<marker>.pdf/.txt` plot and table of proportion of proliferating/not proliferating cells of a given marker across lymphomoids
+* `Results_ImageXLymphomoid_level/*` same output of the point above, but without lymphomoid-level summarization (i.e. 'image X lymphomoid' level). It could be useful to check that two images of the same lymphomoid (before summarization) have comparable cell proportions
+* `log_files/*` .log files with date and time of the script runs in their name and containing the various input file paths for reproducibility
+Since all tables are saved, you can customize your plots/perfom additional downstream analyses by reading them back in your favourite programming language.
+
+
 

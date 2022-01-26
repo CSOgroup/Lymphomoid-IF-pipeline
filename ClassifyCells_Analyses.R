@@ -3,11 +3,10 @@
 MainDir = "/Users/daniele/Mounted_folder_daniele_ndata/elisa_lymphomoids/Processed/Pipeline_test/" # Absolute path to your main directory
 ConfigTable = "/Users/daniele/Mounted_folder_daniele_ndata/elisa_lymphomoids/Scripts/Lymphomoid-IF-pipeline/mouse_channels.txt" # Configuration table as 'mouse_channels.txt' or 'human_channels.txt' 
 Lymphomoids_to_process = "all" # "all", or vector of boundary file names (e.g. Lymphomoids_to_process = c( "HLS01_s02_acq03_Pembroluzimab01_Boundary.txt", "HLS01_s02_acq03_Pembroluzimab02_Boundary.txt" ) )
-plot_IF_images = T # T or F
-saving_format = "RData" # RData or txt (plain text)
 ###########################
 
 ###### Plotting parameters ######
+plot_IF_images = TRUE # TRUE or FALSE. FALSE makes the script run faster.
 antibody_colors = data.frame(antibody_mouse = c("B220","CD4","CD8","F4/80","otherCell"), antibody_human = c("CD20","CD4","CD8","CD68","otherCell"), color = c("green","yellow","cyan","magenta","gray"))
 maxSizePlot_inches = 20
 cellSizePlot_um = 100
@@ -75,7 +74,7 @@ plot_digital_image = function(fileName, quant, plp_df, withOtherCells = T, onlyI
    p = ggplot(quant, aes(x=spatial_1, y=spatial_2, color=CellType_antibody)) + geom_point(stroke=0,size=r) + scale_color_manual(values=colorz ) + scale_y_reverse() + geom_path(data = plp_df, mapping = aes(x = x, y = y), color = "red", size = boundary_thickness) + theme_void() + theme(panel.background = element_rect(fill = 'black', colour = 'black')) + theme(legend.position = 'none')
    print(p)
    dev.off()
-   return()
+   return(p)
 }
 
 plot_CellTypeProportions = function(markers, ldf, OutFileRoot){
@@ -83,15 +82,15 @@ plot_CellTypeProportions = function(markers, ldf, OutFileRoot){
    cdf = ldf[,markers]/apply(ldf[,markers],1,sum)
    cdf$Sample = rownames(cdf)
    write.table(cdf, file = paste0(MainDir,OutFileRoot,".txt"), quote = F, col.names = T, row.names = T, sep = "\t")
-   cdf = melt(cdf)
+   cdf = melt(cdf,id="Sample")
    cdf$variable = factor(cdf$variable, levels = markers)
    cdf$Sample = factor(cdf$Sample, levels = rownames(ldf))
    pdf(paste0(MainDir,OutFileRoot,".pdf"),2*nrow(ldf),6)
    p = ggplot(data=cdf, aes(x=Sample, y=value, fill=variable)) +
-      geom_bar(stat="identity", colour="black", size = 0.5) + ylab("Proportion") + xlab("") + scale_fill_discrete(name ="Marker") + scale_fill_manual(name = "Marker",values=colors) + theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels= rownames(ldf))
+      geom_bar(stat="identity", colour="black", size = 0.5) + ylab("Proportion") + xlab("") + scale_fill_manual(name = "Marker",values=colors) + theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels= rownames(ldf))
    print(p)
    dev.off()
-   return()
+   return(p)
 }
 
 plot_ProlifVsNot = function(markers, ldf, OutFileRoot){
@@ -105,7 +104,7 @@ plot_ProlifVsNot = function(markers, ldf, OutFileRoot){
       colnames(cdf) = c("Not proliferating","Proliferating")
       cdf$Sample = rownames(cdf)
       write.table(cdf, file = paste0(MainDir,OutFileRoot,gsub("/","-",marker),".txt"), quote = F, col.names = T, row.names = T, sep = "\t")
-      cdf = melt(cdf)
+      cdf = melt(cdf,id="Sample")
       cdf$variable = factor(cdf$variable, levels = c("Not proliferating","Proliferating"))
       cdf$Sample = factor(cdf$Sample, levels = rownames(ldf))
       pdf(paste0(MainDir,OutFileRoot,gsub("/","-",marker),".pdf"),2*nrow(ldf),6)
@@ -114,7 +113,7 @@ plot_ProlifVsNot = function(markers, ldf, OutFileRoot){
       print(p)
       dev.off()
    }
-   return()
+   return(p)
 }
 
 ###############################
@@ -169,11 +168,11 @@ for (ll in Lymphomoids_to_process)
    if (plot_IF_images)
    {
       fileName = paste0(MainDir,"Digital_IF_images/","IFimage_",ImageName,"_",LymphomoidName,"_all.pdf")
-      plot_digital_image(fileName, quant, plp_df, withOtherCells = T, onlyInLymphomoid = F, onlyProliferating = F)
+      p = plot_digital_image(fileName, quant, plp_df, withOtherCells = T, onlyInLymphomoid = F, onlyProliferating = F)
       fileName = paste0(MainDir,"Digital_IF_images/","IFimage_",ImageName,"_",LymphomoidName,"_NoOtherCells_OnlyInLymphomoid.pdf")
-      plot_digital_image(fileName, quant, plp_df, withOtherCells = F, onlyInLymphomoid = T, onlyProliferating = F)
+      p = plot_digital_image(fileName, quant, plp_df, withOtherCells = F, onlyInLymphomoid = T, onlyProliferating = F)
       fileName = paste0(MainDir,"Digital_IF_images/","IFimage_",ImageName,"_",LymphomoidName,"_NoOtherCells_OnlyInLymphomoid_OnlyProliferating.pdf")
-      plot_digital_image(fileName, quant, plp_df, withOtherCells = F, onlyInLymphomoid = T, onlyProliferating = T)
+      p = plot_digital_image(fileName, quant, plp_df, withOtherCells = F, onlyInLymphomoid = T, onlyProliferating = T)
    }
    
    ## Saving data
@@ -181,8 +180,7 @@ for (ll in Lymphomoids_to_process)
    quant$Y_centroid_nucleus = NULL
    colnames(quant)[colnames(quant) %in% c( "spatial_1","spatial_2" )] = c( "x_centroid_nucleus_um","y_centroid_nucleus_um" )
    quant = quant[quant$in_lymphomoid,]
-   if (saving_format=="RData") { save(quant, file = paste0(MainDir,"Classified_cells_tables/Table_",ImageName,"_",LymphomoidName,"_AllCells.RData")) }
-   if (saving_format=="txt") { write.table(quant, file = paste0(MainDir,"Classified_cells_tables/Table_",ImageName,"_",LymphomoidName,"_AllCells.txt"), row.names = F, col.names = T, quote = F, sep = "\t") }
+   write.table(quant, file = paste0(MainDir,"Classified_cells_tables/Table_",ImageName,"_",LymphomoidName,"_AllCells.txt"), row.names = F, col.names = T, quote = F, sep = "\t")
 
    ## Concatenating summary for all lymphomoids
    ttdf = data.frame(matrix(0,nrow = 1, ncol = length(all_colz), dimnames = list(paste0(ImageName,"_",LymphomoidName),all_colz)))
@@ -200,9 +198,9 @@ for (ll in Lymphomoids_to_process)
 dir.create(paste0(MainDir,"Results_ImageXLymphomoid_level/"),showWarnings = F)
 save(tdf, file = paste0(MainDir,"Results_ImageXLymphomoid_level/SummaryTable_ImageXLymphomoid_AllCells.RData"))
 write.table(tdf, file = paste0(MainDir,"Results_ImageXLymphomoid_level/SummaryTable_ImageXLymphomoid_AllCells.txt"), row.names = F, col.names = T, quote = F, sep = "\t")
-plot_CellTypeProportions(markers = all_markerz, ldf = tdf, OutFileRoot = "Results_ImageXLymphomoid_level/ImageXLymphomoidLevel_CellTypeProportions_StackedBarplot")
-plot_CellTypeProportions(markers = all_markerz[all_markerz!="otherCell"], ldf = tdf, OutFileRoot = "Results_ImageXLymphomoid_level/ImageXLymphomoidLevel_CellTypeProportions_ExclOtherCells_StackedBarplot")
-plot_ProlifVsNot(markers = all_markerz[all_markerz!="otherCell"], ldf = tdf, OutFileRoot = "Results_ImageXLymphomoid_level/ImageXLymphomoidLevel_ProlifVsNot_")
+p = plot_CellTypeProportions(markers = all_markerz, ldf = tdf, OutFileRoot = "Results_ImageXLymphomoid_level/ImageXLymphomoidLevel_CellTypeProportions_StackedBarplot")
+p = plot_CellTypeProportions(markers = all_markerz[all_markerz!="otherCell"], ldf = tdf, OutFileRoot = "Results_ImageXLymphomoid_level/ImageXLymphomoidLevel_CellTypeProportions_ExclOtherCells_StackedBarplot")
+p = plot_ProlifVsNot(markers = all_markerz[all_markerz!="otherCell"], ldf = tdf, OutFileRoot = "Results_ImageXLymphomoid_level/ImageXLymphomoidLevel_ProlifVsNot_")
 
 ## Consolidating the same lymphomoid across images, saving and plotting
 tdf$ImageName = NULL
@@ -210,9 +208,9 @@ ldf = aggregate(.~LymphomoidName, data = tdf, FUN=mean)
 rownames(ldf) = ldf$LymphomoidName
 save(ldf, file = paste0(MainDir,"SummaryTable_LymphomoidLevel_AllCells.RData"))
 write.table(ldf, file = paste0(MainDir,"SummaryTable_LymphomoidLevel_AllCells.txt"), row.names = F, col.names = T, quote = F, sep = "\t")
-plot_CellTypeProportions(markers = all_markerz, ldf = ldf, OutFileRoot = "LymphomoidLevel_CellTypeProportions_StackedBarplot")
-plot_CellTypeProportions(markers = all_markerz[all_markerz!="otherCell"], ldf = ldf, OutFileRoot = "LymphomoidLevel_CellTypeProportions_ExclOtherCells_StackedBarplot")
-plot_ProlifVsNot(markers = all_markerz[all_markerz!="otherCell"], ldf = ldf, OutFileRoot = "LymphomoidLevel_ProlifVsNot_")
+p = plot_CellTypeProportions(markers = all_markerz, ldf = ldf, OutFileRoot = "LymphomoidLevel_CellTypeProportions_StackedBarplot")
+p = plot_CellTypeProportions(markers = all_markerz[all_markerz!="otherCell"], ldf = ldf, OutFileRoot = "LymphomoidLevel_CellTypeProportions_ExclOtherCells_StackedBarplot")
+p = plot_ProlifVsNot(markers = all_markerz[all_markerz!="otherCell"], ldf = ldf, OutFileRoot = "LymphomoidLevel_ProlifVsNot_")
 
 ## Creating and saving log table
 logdf = data.frame(
@@ -225,8 +223,9 @@ logdf = data.frame(
    Lymphomoid_level_output_table = paste0("SummaryTable_LymphomoidLevel_AllCells.txt")
    )
 tl = data.frame(t(logdf))
+dir.create(paste0(MainDir,"log_files/"),showWarnings=F)
 logdf = data.frame(variable = paste0(rownames(tl)," = "), value = tl[,1])
 logfilename = paste0("run_ClassifyCells_date",Sys.Date(),"_time",gsub(":",".",substr(Sys.time(),nchar(as.character(Sys.Date()))+2,nchar(as.character(Sys.time())))),".log")
-write.table(logdf, file = paste0(MainDir,logfilename), row.names = F, col.names = F, sep = "\t", quote = F)
+write.table(logdf, file = paste0(MainDir,"log_files/",logfilename), row.names = F, col.names = F, sep = "\t", quote = F)
 
 
