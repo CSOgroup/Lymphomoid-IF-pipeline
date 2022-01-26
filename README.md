@@ -161,6 +161,7 @@ In this step we will take quantification performed at step 4 and classify the ce
    * Optionally, you can change some of the plotting parameters
 3. If they are not already installed, install R packages `sp`, `ggplot2` and `reshape2`
 4. Run the script
+
 The script will generate the following output under MainDir (all folders are created automatically):
 * `Classified_cells_tables/Table_<ImageName>_<LymphomoidName>_AllCells.txt` containing, for each cell (rows), information on marker intensities, centroid coordinates in micrometers, assigned marker/antibody and wheter the cell is proliferating
 * `Digital_IF_images/`
