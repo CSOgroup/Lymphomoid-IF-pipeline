@@ -175,6 +175,7 @@ The script will generate the following output under MainDir (all folders are cre
    - `LymphomoidLevel_ProlifVsNot_<marker>.pdf/.txt` plot and table of proportion of proliferating/not proliferating cells of a given marker across lymphomoids
 * `Results_ImageXLymphomoid_level/*` same output of the point above, but without lymphomoid-level summarization (i.e. 'image X lymphomoid' level). It could be useful to check that two images of the same lymphomoid (before summarization) have comparable cell proportions
 * `log_files/*` .log files with date and time of the script runs in their name and containing the various input file paths for reproducibility
+
 Since all tables are saved, you can customize your plots/perfom additional downstream analyses by reading them back in your favourite programming language.
 
 
