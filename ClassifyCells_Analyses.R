@@ -8,16 +8,18 @@ saving_format = "RData" # RData or txt (plain text)
 ###########################
 
 ###### Plotting parameters ######
-## For digital IF images
-antibody_colors = data.frame(antibody_mouse = c("B220","CD4","CD8","F4/80"), antibody_human = c("CD20","CD4","CD8","CD68"), color = c("green","yellow","cyan","magenta"))
+antibody_colors = data.frame(antibody_mouse = c("B220","CD4","CD8","F4/80","otherCell"), antibody_human = c("CD20","CD4","CD8","CD68","otherCell"), color = c("green","yellow","cyan","magenta","gray"))
 maxSizePlot_inches = 20
 cellSizePlot_um = 100
 boundary_thickness = 2
+prolif_color = "deepskyblue"
 #################################
 
 ########## Functions ##########
 library(sp)
 library(ggplot2)
+library(reshape2)
+
 parse_boundary = function(pl, pixelSize){
    pl_points = unlist(strsplit(as.character(pl[1,"V1"]), split=";"))
    plp_df = data.frame(x = rep(NA,length(pl_points)+1), y = rep(NA,length(pl_points)+1))
@@ -46,8 +48,6 @@ classify_cells = function(quant, ll_config){
    quant$CellType_color = "gray"
    quant$CellType_antibody = "otherCell"
    quant$CellType_marker = "otherCell"
-   if (length(intersect(rownames(ll_config),antibody_colors$antibody_mouse))==4 ) rownames(antibody_colors) = antibody_colors$antibody_mouse
-   if (length(intersect(rownames(ll_config),antibody_colors$antibody_human))==4 ) rownames(antibody_colors) = antibody_colors$antibody_human
    for (index in 1:4)
    {
       quant[quant$CellType_index==index,"CellType_color"] = antibody_colors[colnames(this_inte)[index],"color"]
@@ -78,7 +78,44 @@ plot_digital_image = function(fileName, quant, plp_df, withOtherCells = T, onlyI
    return()
 }
 
+plot_CellTypeProportions = function(markers, ldf, OutFileRoot){
+   colors = antibody_colors[markers,"color"]
+   cdf = ldf[,markers]/apply(ldf[,markers],1,sum)
+   cdf$Sample = rownames(cdf)
+   write.table(cdf, file = paste0(MainDir,OutFileRoot,".txt"), quote = F, col.names = T, row.names = T, sep = "\t")
+   cdf = melt(cdf)
+   cdf$variable = factor(cdf$variable, levels = markers)
+   cdf$Sample = factor(cdf$Sample, levels = rownames(ldf))
+   pdf(paste0(MainDir,OutFileRoot,".pdf"),2*nrow(ldf),6)
+   p = ggplot(data=cdf, aes(x=Sample, y=value, fill=variable)) +
+      geom_bar(stat="identity", colour="black", size = 0.5) + ylab("Proportion") + xlab("") + scale_fill_discrete(name ="Marker") + scale_fill_manual(name = "Marker",values=colors) + theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels= rownames(ldf))
+   print(p)
+   dev.off()
+   return()
+}
 
+plot_ProlifVsNot = function(markers, ldf, OutFileRoot){
+   colors = antibody_colors[markers,"color"]
+   for (marker in markers)
+   {
+      cdf = ldf[,c(marker,paste0("prolif_",marker))]
+      total = cdf[,marker]
+      cdf[,marker] = cdf[,marker]-cdf[,paste0("prolif_",marker)]
+      cdf = cdf/total
+      colnames(cdf) = c("Not proliferating","Proliferating")
+      cdf$Sample = rownames(cdf)
+      write.table(cdf, file = paste0(MainDir,OutFileRoot,gsub("/","-",marker),".txt"), quote = F, col.names = T, row.names = T, sep = "\t")
+      cdf = melt(cdf)
+      cdf$variable = factor(cdf$variable, levels = c("Not proliferating","Proliferating"))
+      cdf$Sample = factor(cdf$Sample, levels = rownames(ldf))
+      pdf(paste0(MainDir,OutFileRoot,gsub("/","-",marker),".pdf"),2*nrow(ldf),6)
+      p = ggplot(data=cdf, aes(x=Sample, y=value, fill=variable)) +
+         geom_bar(stat="identity", colour="black", size = 0.5) + ylab("Proportion") + xlab("") + scale_fill_manual(name = marker,values=c(colors[which(marker==markers)],prolif_color)) + theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels= rownames(ldf))
+      print(p)
+      dev.off()
+   }
+   return()
+}
 
 ###############################
 
@@ -87,17 +124,29 @@ channels = read.table( file = ConfigTable, sep = "\t", header = T, quote = '' ,s
 dir.create(paste0(MainDir,"Digital_IF_images/"), showWarnings = F)
 dir.create(paste0(MainDir,"Classified_cells_tables/"), showWarnings = F)
 if (Lymphomoids_to_process=="all"){ Lymphomoids_to_process = list.files(paste0( MainDir,"Lymphomoid_boundaries/" ), pattern = "Boundary.txt") }
+if (length(intersect(channels$Antibody,antibody_colors$antibody_mouse))==4 ) rownames(antibody_colors) = antibody_colors$antibody_mouse
+if (length(intersect(channels$Antibody,antibody_colors$antibody_human))==4 ) rownames(antibody_colors) = antibody_colors$antibody_human
+all_markerz = c("otherCell", channels$Antibody[!(channels$Antibody %in% c( "DAPI","Ki67" ))])
+all_colz = c("ImageName","LymphomoidName",all_markerz, paste0("prolif_",all_markerz ),"TotalCells")
+tdf = data.frame(matrix(nrow = 0, ncol = length(all_colz), dimnames = list(NULL,all_colz)))
+colnames(tdf)[colnames(tdf)=="F4.80"] = "F4/80"
+colnames(tdf)[colnames(tdf)=="prolif_F4.80"] = "prolif_F4/80"
+quant_file_vec = c() # for log file
+calib_file_vec = c() # for log file
 for (ll in Lymphomoids_to_process)
 {
+   cat("\n","Processing",ll,"...","\n" )
    ## Parsing and reading
    ImageName = sub("_[^_]+$", "", substr(ll,1,nchar(ll)-13))
    LymphomoidName = substr(ll,nchar(ImageName)+2,nchar(ll)-13)
    quant_file = paste0(MainDir,"HLS_Quantification/",ImageName,"/quantification/mesmer-",ImageName,"_merged.csv")
+   quant_file_vec = c(quant_file_vec,substr(quant_file,nchar(MainDir)+1,nchar(quant_file)))
    if (!file.exists(quant_file)) { next }
    quant = read.csv(quant_file,stringsAsFactors = F)
    quant = quant[,!(colnames(quant) %in% c( "Area_nucleus","MajorAxisLength_nucleus","MinorAxisLength_nucleus","Eccentricity_nucleus","Solidity_nucleus","Extent_nucleus","Orientation_nucleus","X_centroid_cytoplasm","Y_centroid_cytoplasm","Area_cytoplasm","MajorAxisLength_cytoplasm","MinorAxisLength_cytoplasm","Eccentricity_cytoplasm","Solidity_cytoplasm","Extent_cytoplasm","Orientation_cytoplasm" ))]
    colnames(quant)[colnames(quant)=="F4.80"] = "F4/80"
    calib_file = paste0(MainDir,"Calibrated_thresholds/",ImageName,"_AllThresholds.txt")
+   calib_file_vec = c(calib_file_vec,substr(calib_file,nchar(MainDir)+1,nchar(calib_file)))
    if (!file.exists(calib_file)) { next }
    calib = read.table( file = calib_file, sep = " ", header = F, quote = '' ,stringsAsFactors = F)
    rownames(calib) = calib$V1
@@ -131,8 +180,53 @@ for (ll in Lymphomoids_to_process)
    quant$X_centroid_nucleus = NULL
    quant$Y_centroid_nucleus = NULL
    colnames(quant)[colnames(quant) %in% c( "spatial_1","spatial_2" )] = c( "x_centroid_nucleus_um","y_centroid_nucleus_um" )
+   quant = quant[quant$in_lymphomoid,]
    if (saving_format=="RData") { save(quant, file = paste0(MainDir,"Classified_cells_tables/Table_",ImageName,"_",LymphomoidName,"_AllCells.RData")) }
    if (saving_format=="txt") { write.table(quant, file = paste0(MainDir,"Classified_cells_tables/Table_",ImageName,"_",LymphomoidName,"_AllCells.txt"), row.names = F, col.names = T, quote = F, sep = "\t") }
+
+   ## Concatenating summary for all lymphomoids
+   ttdf = data.frame(matrix(0,nrow = 1, ncol = length(all_colz), dimnames = list(paste0(ImageName,"_",LymphomoidName),all_colz)))
+   colnames(ttdf)[colnames(ttdf)=="F4.80"] = "F4/80"
+   colnames(ttdf)[colnames(ttdf)=="prolif_F4.80"] = "prolif_F4/80"
+   ttdf[, c( "ImageName","LymphomoidName" )] = c( ImageName,LymphomoidName )
+   ttdf[,names(table(quant$CellType_antibody))] = as.numeric(table(quant$CellType_antibody))
+   ttdf[,"TotalCells"] = sum(as.numeric(table(quant$CellType_antibody)))
+   ttdf[,paste0("prolif_",rownames(table(quant$CellType_antibody,quant$is_proliferating)))] = as.numeric(table(quant$CellType_antibody,quant$is_proliferating)[,"TRUE"])
+   tdf = rbind(tdf, ttdf)
    
 }
+
+## Saving and plotting at the image X lymphomoid level
+dir.create(paste0(MainDir,"Results_ImageXLymphomoid_level/"),showWarnings = F)
+save(tdf, file = paste0(MainDir,"Results_ImageXLymphomoid_level/SummaryTable_ImageXLymphomoid_AllCells.RData"))
+write.table(tdf, file = paste0(MainDir,"Results_ImageXLymphomoid_level/SummaryTable_ImageXLymphomoid_AllCells.txt"), row.names = F, col.names = T, quote = F, sep = "\t")
+plot_CellTypeProportions(markers = all_markerz, ldf = tdf, OutFileRoot = "Results_ImageXLymphomoid_level/ImageXLymphomoidLevel_CellTypeProportions_StackedBarplot")
+plot_CellTypeProportions(markers = all_markerz[all_markerz!="otherCell"], ldf = tdf, OutFileRoot = "Results_ImageXLymphomoid_level/ImageXLymphomoidLevel_CellTypeProportions_ExclOtherCells_StackedBarplot")
+plot_ProlifVsNot(markers = all_markerz[all_markerz!="otherCell"], ldf = tdf, OutFileRoot = "Results_ImageXLymphomoid_level/ImageXLymphomoidLevel_ProlifVsNot_")
+
+## Consolidating the same lymphomoid across images, saving and plotting
+tdf$ImageName = NULL
+ldf = aggregate(.~LymphomoidName, data = tdf, FUN=mean)
+rownames(ldf) = ldf$LymphomoidName
+save(ldf, file = paste0(MainDir,"SummaryTable_LymphomoidLevel_AllCells.RData"))
+write.table(ldf, file = paste0(MainDir,"SummaryTable_LymphomoidLevel_AllCells.txt"), row.names = F, col.names = T, quote = F, sep = "\t")
+plot_CellTypeProportions(markers = all_markerz, ldf = ldf, OutFileRoot = "LymphomoidLevel_CellTypeProportions_StackedBarplot")
+plot_CellTypeProportions(markers = all_markerz[all_markerz!="otherCell"], ldf = ldf, OutFileRoot = "LymphomoidLevel_CellTypeProportions_ExclOtherCells_StackedBarplot")
+plot_ProlifVsNot(markers = all_markerz[all_markerz!="otherCell"], ldf = ldf, OutFileRoot = "LymphomoidLevel_ProlifVsNot_")
+
+## Creating and saving log table
+logdf = data.frame(
+   MainDir = MainDir,
+   ConfigTable = ConfigTable,
+   lymphomoid_boundaries = paste(paste0("Lymphomoid_boundaries/",Lymphomoids_to_process), collapse = ","),
+   quantification_tables = paste(quant_file_vec, collapse = ","),
+   calibration_tables = paste(calib_file_vec, collapse = ","),
+   ImageXLymphomoid_level_output_table = paste0("Results_ImageXLymphomoid_level/SummaryTable_ImageXLymphomoid_AllCells.txt"),
+   Lymphomoid_level_output_table = paste0("SummaryTable_LymphomoidLevel_AllCells.txt")
+   )
+tl = data.frame(t(logdf))
+logdf = data.frame(variable = paste0(rownames(tl)," = "), value = tl[,1])
+logfilename = paste0("run_ClassifyCells_date",Sys.Date(),"_time",gsub(":",".",substr(Sys.time(),nchar(as.character(Sys.Date()))+2,nchar(as.character(Sys.time())))),".log")
+write.table(logdf, file = paste0(MainDir,logfilename), row.names = F, col.names = F, sep = "\t", quote = F)
+
 
