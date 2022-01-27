@@ -10,15 +10,15 @@ def imageData = QPEx.getCurrentImageData()
 clearDetections();
 
 // ----------- Input ----------- 
-MainDir = "/Users/daniele/Mounted_folder_daniele_ndata/elisa_lymphomoids/Processed/Pipeline_test/" // Absolute path to your main directory
-ConfigTable = "/Users/daniele/Mounted_folder_daniele_ndata/elisa_lymphomoids/Scripts/Lymphomoid-IF-pipeline/mouse_channels.txt" // Configuration table as 'mouse_channels.txt' or 'human_channels.txt' 
-ImageName = "HLS09_s01_acq01"
-DAPI_thresh = 200
-FITC_thresh = 300
+MainDir = "/Users/daniele/Mounted_folder_daniele_ndata/elisa_lymphomoids/Processed/Pipeline_final_test/" // Absolute path to your main directory
+ConfigTable = "/Users/daniele/Mounted_folder_daniele_ndata/elisa_lymphomoids/Scripts/Lymphomoid-IF-pipeline/human_channels.txt" // Configuration table as 'mouse_channels.txt' or 'human_channels.txt' 
+ImageName = "HLS16_s01_acq03"
+DAPI_thresh = 100
+FITC_thresh = 280
 CY5_thresh = 110
-CFP_thresh = 300
+CFP_thresh = 280
 RFP_thresh = 300
-Alexa_thresh = 300
+Alexa_thresh = 100
 // -----------------------------
 
 // ------ Parsing config table ------
@@ -35,9 +35,9 @@ for (int line in 1..(fileArray.size()-1)){
 // ----------- Calibration ----------- 
 // DAPI
 runPlugin('qupath.imagej.detect.cells.WatershedCellDetection', '{"detectionImage": "DAPI",  "requestedPixelSizeMicrons": 0.5,  "backgroundRadiusMicrons": 15.0,  "medianRadiusMicrons": 0.0,  "sigmaMicrons": 1.0,  "minAreaMicrons": 5.0,  "maxAreaMicrons": 100.0,  "threshold": '+DAPI_thresh+',  "watershedPostProcess": true,  "cellExpansionMicrons": 2.5,  "includeNuclei": true,  "smoothBoundaries": true,  "makeMeasurements": true}');
- // // FITC
- // print('FITC: detecting '+channel_antibody_map['FITC']+' in the '+channel_celllocation_map['FITC'])
- // setCellIntensityClassifications(channel_celllocation_map['FITC']+": FITC mean", FITC_thresh)
+// FITC
+print('FITC: detecting '+channel_antibody_map['FITC']+' in the '+channel_celllocation_map['FITC'])
+setCellIntensityClassifications(channel_celllocation_map['FITC']+": FITC mean", FITC_thresh)
 // // CY5
 // print('CY5: detecting '+channel_antibody_map['CY5']+' in the '+channel_celllocation_map['CY5'])
 // setCellIntensityClassifications(channel_celllocation_map['CY5']+": CY5 mean", CY5_thresh)

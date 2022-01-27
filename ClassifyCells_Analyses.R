@@ -126,7 +126,7 @@ if (Lymphomoids_to_process=="all"){ Lymphomoids_to_process = list.files(paste0( 
 if (length(intersect(channels$Antibody,antibody_colors$antibody_mouse))==4 ) rownames(antibody_colors) = antibody_colors$antibody_mouse
 if (length(intersect(channels$Antibody,antibody_colors$antibody_human))==4 ) rownames(antibody_colors) = antibody_colors$antibody_human
 all_markerz = c("otherCell", channels$Antibody[!(channels$Antibody %in% c( "DAPI","Ki67" ))])
-all_colz = c("ImageName","LymphomoidName",all_markerz, paste0("prolif_",all_markerz ),"TotalCells")
+all_colz = c("ImageName","PatientLymphomoidName",all_markerz, paste0("prolif_",all_markerz ),"TotalCells")
 tdf = data.frame(matrix(nrow = 0, ncol = length(all_colz), dimnames = list(NULL,all_colz)))
 colnames(tdf)[colnames(tdf)=="F4.80"] = "F4/80"
 colnames(tdf)[colnames(tdf)=="prolif_F4.80"] = "prolif_F4/80"
@@ -137,7 +137,7 @@ for (ll in Lymphomoids_to_process)
    cat("\n","Processing",ll,"...","\n" )
    ## Parsing and reading
    ImageName = sub("_[^_]+$", "", substr(ll,1,nchar(ll)-13))
-   LymphomoidName = substr(ll,nchar(ImageName)+2,nchar(ll)-13)
+   PatientLymphomoidName = substr(ll,nchar(ImageName)+2,nchar(ll)-13)
    quant_file = paste0(MainDir,"HLS_Quantification/",ImageName,"/quantification/mesmer-",ImageName,"_merged.csv")
    quant_file_vec = c(quant_file_vec,substr(quant_file,nchar(MainDir)+1,nchar(quant_file)))
    if (!file.exists(quant_file)) { next }
@@ -167,11 +167,11 @@ for (ll in Lymphomoids_to_process)
    ## Plotting digital IF images
    if (plot_IF_images)
    {
-      fileName = paste0(MainDir,"Digital_IF_images/","IFimage_",ImageName,"_",LymphomoidName,"_all.pdf")
+      fileName = paste0(MainDir,"Digital_IF_images/","IFimage_",ImageName,"_",PatientLymphomoidName,"_all.pdf")
       p = plot_digital_image(fileName, quant, plp_df, withOtherCells = T, onlyInLymphomoid = F, onlyProliferating = F)
-      fileName = paste0(MainDir,"Digital_IF_images/","IFimage_",ImageName,"_",LymphomoidName,"_NoOtherCells_OnlyInLymphomoid.pdf")
+      fileName = paste0(MainDir,"Digital_IF_images/","IFimage_",ImageName,"_",PatientLymphomoidName,"_NoOtherCells_OnlyInLymphomoid.pdf")
       p = plot_digital_image(fileName, quant, plp_df, withOtherCells = F, onlyInLymphomoid = T, onlyProliferating = F)
-      fileName = paste0(MainDir,"Digital_IF_images/","IFimage_",ImageName,"_",LymphomoidName,"_NoOtherCells_OnlyInLymphomoid_OnlyProliferating.pdf")
+      fileName = paste0(MainDir,"Digital_IF_images/","IFimage_",ImageName,"_",PatientLymphomoidName,"_NoOtherCells_OnlyInLymphomoid_OnlyProliferating.pdf")
       p = plot_digital_image(fileName, quant, plp_df, withOtherCells = F, onlyInLymphomoid = T, onlyProliferating = T)
    }
    
@@ -180,13 +180,13 @@ for (ll in Lymphomoids_to_process)
    quant$Y_centroid_nucleus = NULL
    colnames(quant)[colnames(quant) %in% c( "spatial_1","spatial_2" )] = c( "x_centroid_nucleus_um","y_centroid_nucleus_um" )
    quant = quant[quant$in_lymphomoid,]
-   write.table(quant, file = paste0(MainDir,"Classified_cells_tables/Table_",ImageName,"_",LymphomoidName,"_AllCells.txt"), row.names = F, col.names = T, quote = F, sep = "\t")
+   write.table(quant, file = paste0(MainDir,"Classified_cells_tables/Table_",ImageName,"_",PatientLymphomoidName,"_AllCells.txt"), row.names = F, col.names = T, quote = F, sep = "\t")
 
    ## Concatenating summary for all lymphomoids
-   ttdf = data.frame(matrix(0,nrow = 1, ncol = length(all_colz), dimnames = list(paste0(ImageName,"_",LymphomoidName),all_colz)))
+   ttdf = data.frame(matrix(0,nrow = 1, ncol = length(all_colz), dimnames = list(paste0(ImageName,"_",PatientLymphomoidName),all_colz)))
    colnames(ttdf)[colnames(ttdf)=="F4.80"] = "F4/80"
    colnames(ttdf)[colnames(ttdf)=="prolif_F4.80"] = "prolif_F4/80"
-   ttdf[, c( "ImageName","LymphomoidName" )] = c( ImageName,LymphomoidName )
+   ttdf[, c( "ImageName","PatientLymphomoidName" )] = c( ImageName,PatientLymphomoidName )
    ttdf[,names(table(quant$CellType_antibody))] = as.numeric(table(quant$CellType_antibody))
    ttdf[,"TotalCells"] = sum(as.numeric(table(quant$CellType_antibody)))
    ttdf[,paste0("prolif_",rownames(table(quant$CellType_antibody,quant$is_proliferating)))] = as.numeric(table(quant$CellType_antibody,quant$is_proliferating)[,"TRUE"])
@@ -204,8 +204,8 @@ p = plot_ProlifVsNot(markers = all_markerz[all_markerz!="otherCell"], ldf = tdf,
 
 ## Consolidating the same lymphomoid across images, saving and plotting
 tdf$ImageName = NULL
-ldf = aggregate(.~LymphomoidName, data = tdf, FUN=mean)
-rownames(ldf) = ldf$LymphomoidName
+ldf = aggregate(.~PatientLymphomoidName, data = tdf, FUN=mean)
+rownames(ldf) = ldf$PatientLymphomoidName
 save(ldf, file = paste0(MainDir,"SummaryTable_LymphomoidLevel_AllCells.RData"))
 write.table(ldf, file = paste0(MainDir,"SummaryTable_LymphomoidLevel_AllCells.txt"), row.names = F, col.names = T, quote = F, sep = "\t")
 p = plot_CellTypeProportions(markers = all_markerz, ldf = ldf, OutFileRoot = "LymphomoidLevel_CellTypeProportions_StackedBarplot")
