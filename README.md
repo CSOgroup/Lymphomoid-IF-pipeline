@@ -49,6 +49,7 @@ In this step, you will tune the thresholds for each channel to classify a cell a
    * Run the script and inspect the results visually. Cells positive for FITC will appear in red, negative cells will be blue.
    * Tune the FITC threshold and re-run the script until you are satisfied with the results
    * Once you are done, comment out again the lines related to the FITC classification. Don't ever comment out the line related to the DAPI nuclei detection.
+   <br><p align="center"> <img src="img/calibration_example.png" width="800"/></p><br>
 6. Repeat step 5 for all the other channels. Remember that at every tuning round only the lines related to (1) the DAPI detection and (2) the intensity classification of your channel of interest should be uncommented in the _Calibration_ section
 7. If you wish, repeat all the steps from 1 to 6 drawing a different rectangular region, to test whether your thresholds would stay the same or not
 8. At each run, the script is saving and overwriting the output file with all the thresholds. Thus, your last run should be done with all the thresholds already tuned, as the final output file will be saved with those. If you want to run the script without saving the file, comment out the _Saving_ section
