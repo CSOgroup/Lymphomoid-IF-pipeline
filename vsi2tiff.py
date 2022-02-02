@@ -60,7 +60,7 @@ try:
             output_path = os.path.join(args.output_dir, 'Tiff', f'{sample_name}_{vsi_name}_acq{count:02d}.ome.tif')
             if os.path.exists(output_path):
                 os.remove(output_path)
-            result = os.system(f"{os.path.join(args.bftools_dir, 'bfconvert')} -option BF_MAXMEM 128g -series 12  -bigtiff -pyramid-resolutions 1 {args.input_vsi} {output_path}")
+            run_command(f"{os.path.join(args.bftools_dir, 'bfconvert')} -option BF_MAXMEM 128g -series 12  -bigtiff -pyramid-resolutions 1 {args.input_vsi} {output_path}")
             print(f'Acquisition {count} exported to {output_path}')
             print()
             count += 1
