@@ -1,25 +1,33 @@
 # Lymphomoid’s IF analysis pipeline
 This pipeline was put together by Daniele Tavernari and Marco Varrone in December 2021 to streamline the analysis of multicolor immunofluorescence (IF) images of lymphoma and lymphomoid samples. It involves both manual and automated steps using open source tools and custom scripts that we developed. The pipeline is not optimal and can be improved in some of its parts. Feel free to adapt / modify / further develop the pipeline itself or the scripts involved, and reach out to us if you want to discuss.
 
+The pipeline scripts must be downloaded on the server. So it strongly suggested to create one directory for the pipeline and one directory for managing the data during the executions of the scripts. We will refer to the latter as the _main directory_.
+
+Then to work with QuPath on your computer, you can install QuPath on your local machine and mount both the code directory and the main directory on your local machine. Be aware that huge images require a good internet connection to be loaded and inspected without lags. A good amount of RAM is also advisable. 
+If you are using _sshfs_ to mount the folders on a Mac, add the `-o defer_permissions` parameter to avoid problems of permission denied when saving files.
+
+
 ## Step 1 - Image loading and inspection on QuPath
-A good starting point is to load and visualize your IF image on QuPath. You can download QuPath and browse its documentation [here](https://qupath.github.io/). You can install QuPath on your local machine and open images stored on the server by mounting the corresponding folders on your local machine. Be aware that huge images require a good internet connection to be loaded and inspected without lags. A good amount of RAM is also advisable. 
+A good starting point is to load and visualize your IF image on QuPath. You can download QuPath and browse its documentation [here](https://qupath.github.io/).
 
 QuPath is organized into “projects”. When you create a new project, you will be asked to allocate an empty folder to it. Then, you can add images to the project. It is fast to switch between images of the same project, and you will see the thumbnails of all of them at the same time; conversely, to inspect the images of a different project you will have to close the current one and open the other. This can affect the way you want to organize your project(s): I recommend to put related images into the same project (e.g. all images of the same patient, or of the same treatment). It is in principle also possible to store all images of all patients in the same project, but it probably would become messy.
 
-When loading a .vsi raw image file, sometimes the same file will contain more than one image (different acquisitions of the same sample, or even different samples). Discard those that are unusable (e.g. out of focus, or with too little tissue and only fatty holes). Instead, for the good images, change their QuPath image name into a meaningful one (sometimes the name of the raw file is just e.g. “Image_10.vsi” - you might want to change it into e.g. “HLS23_s12_acq01”, which mentions the Human Lymphoma Sample number, the paraffin section, and the acquisition ID of that section).  It is advisable to rename them in a clear and consistent way.
+When loading a .vsi raw image file, sometimes the same file will contain more than one image (different acquisitions of the same sample, or even different samples). Discard those that are unusable (e.g. out of focus, or with too little tissue and only fatty holes). Instead, for the good images, change their QuPath image name into a meaningful one (sometimes the name of the raw file is just e.g. “Image_10.vsi” - it is strongly suggested, but not required, to rename them as “HLS23_s12_acq01”, which mentions the Human Lymphoma Sample number, the paraffin section, and the acquisition ID of that section) as a clear and consistent way.
 
 Now you can explore the loaded image. If needed, set its type into "Fluorescence". You can change brightness, contrast and show/hide the different channels, corresponding to the different stained proteins. Sometimes it is useful to look at a single channel in grayscale mode. 
 
 
 ## Step 2 - Lymphomoid(s) boundary drawing
 In this step, you will draw and save the coordinates of the boundaries of all lymphomoids present in the image, so that they will be processed separately in the downstream analyses, and pieces of tissue scattered around the gel will be discarded.
-1. For each lymphomoid, draw a closed boundary with QuPath polygon tool
+1. For each lymphomoid, draw a closed boundary with QuPath polygon tool. Boundaries should be drawn around tumor regions in the same way as you did for lymphomoids.<br><p align="center"> <img src="img/boundary_example.png" width="800"/></p><br>
 2. Open _getBoundary.groovy_ script in QuPath script editor (Automate -> Show script editor)
 3. In the script, set the absolute path to your desired main directory for all pipeline input/output files (_MainDir_) and the image name (_ImageName_)
 4. For each boundary:
    * Select the boundary itself (double click - a selected boundary is displayed in yellow)
    * Set the patient-specific lymphomoid name in the script (_PatientLymphomoidName_), avoid using underscores. This name should include the patient ID and the lymphomoid ID (e.g. "LP02ctrl01"). Be careful in this passage: if the same lymphomoid appears in different images, they should all have the same _PatientLymphomoidName_. In this way, different acquisitions (encoded with different _ImageName_'s) will be treated as replicated measurements of the same lymphomoid in the downstream analyses
    * Run the script
+
+The script will also setup the directory _Quantification_ inside the main directory that is required for Step 4.
 
 
 ## Step 3 - Fluorescence threshold calibration on the image
@@ -29,7 +37,7 @@ In this step, you will tune the thresholds for each channel to classify a cell a
 3. In the script, set the absolute path to your desired main directory (_MainDir_) and configuration table (_ConfigTable_), and the image name (_ImageName_) in the _Input_ section. These have to be the same as for the boundary drawing (Step 2, point 3).
 4. Tune the DAPI threshold first:
    * In the 'Brigthness & contrast' menu, turn off all channels except for DAPI, and set it to grayscale
-   * Hover the cursor on the nuclei to have an idea on what might be the threshold
+   * Hover the cursor on the nuclei to have an idea on what might be the threshold. You can see the pixel value on the bottom-right corner of the QuPath image.
    * Assign a reasonable threshold guess to the _DAPI_thresh_ variable in the _Input_ section of the script
    * Run the script and inspect the results visually. You can view/hide the detections in QuPath with View->Show detections (Keyboard shortcut: D)
    * If nuclei have been under- (or over-) called, change the DAPI threshold and re-run the script until you are satisfied with the results
@@ -46,11 +54,11 @@ In this step, you will tune the thresholds for each channel to classify a cell a
 8. At each run, the script is saving and overwriting the output file with all the thresholds. Thus, your last run should be done with all the thresholds already tuned, as the final output file will be saved with those. If you want to run the script without saving the file, comment out the _Saving_ section
 
 ## Step 4 - Nuclei detection and cell-level quantification with DeepCell (work in progress)
+This step, except the part of format conversion, is fairly automatized, so it is suggested to perform Step 1-3 on multiple images, so that Step 4 can be left running on all of them, without running them individually.
+
 DeepCell is a nuclei and cell segmentation software that is more robust to different levels of marker intensity and, thus, gives better results when the intensity of DAPI varies dramatically in the same sample.
 
-The whole process of detecting cells and extract the intensity of the markers is fairly automatized. The crucial step is to setup the input directories and files properly.
-
-The script in run in Step 2 should have already created, inside the main directory, a directory called _Quantification_. _Quantification_ contains other directories with the names of the images for which boundaries have been drawn and finally, each of this directory should contain an empty directory called _registration_.
+The script run in Step 2 should have already created, inside the main directory, a directory called _Quantification_. _Quantification_ contains other directories with the _ImageName_ for which boundaries have been drawn and finally, each of this directory should contain an empty directory called _registration_.
 
 To summarize, you should find a structure like the following:
 
@@ -82,7 +90,7 @@ In this step we will convert the images from the .vsi to the .ome.tif format. Th
    </details>
 4. Note that a single vsi will generate a separate .ome.tif file for each image acquisition. The script will create multiple .ome.tif files concatenating the name of the parent directory of the .vsi file, the name of the .vsi file and the acquisition number.
 5. Delete the acquisitions that have been discarded in Step 1. You can identify those acquisitions because there is no equivalent directory inside _Quantification_.
-6. Rename and move each image into the _registration_ folder of the corresponding directory. So, every registration folder should contain one and only one .ome.tif file, as in the following diagram:
+6. Rename with _ImageName.ome.tif_ and move each image into the _registration_ folder of the corresponding directory. So, every registration folder should contain one and only one .ome.tif file, as in the following diagram:
    ```bash
    Quantification
    ├── HLS07_s01_acq01
@@ -97,6 +105,8 @@ In this step we will convert the images from the .vsi to the .ome.tif format. Th
    ...
    ```
 
+In case you have doubts on to which .vsi file a .ome.tif file corresponds too, you can import the .ome.tif file in QuPath and compare it.
+
 ### Cell detection (i.e. segmentation)
 The cell detection script require few Python packages for basic file processing. They are all already installed as a Python virtual environment in _/mnt/data2/shared/Lymphomoid-IF-software/Lymphomoid-IF-venv/_.
 1. To be able to access the packages you need to activate the environment using:
@@ -104,7 +114,7 @@ The cell detection script require few Python packages for basic file processing.
    `source /mnt/data2/shared/Lymphomoid-IF-software/Lymphomoid-IF-venv/bin/activate`
 
 2. Then you need to run the _cellDetection.py_ script, with the following required parameters:
-   * `--sample_names`: the name of the images for cell detection, it could be 1 or many, separated by a whitespace.
+   * `--sample_names`: a list of _ImageName_ of the images to process, it could be 1 or many, separated by a whitespace (see example later).
    * `--dir`: the path of the _Quantification_ directory
    * `--channel_info_path`: the path to the .txt or .tsv file containing information on the image channels. The values must be separated by tabs. In particular, the file must contain a _Channel\_name_ and a _Cellular\_location_ (Nucleus or Cytoplasm) column.
 
@@ -116,7 +126,7 @@ The cell detection script require few Python packages for basic file processing.
 
    </details>
 
-An example of the script calling is: `python3 cellDetection.py --dir /mnt/data2/varrone/elisa_lymphomoids/HLS_Quantification/ --sample_names HLS25_7 HLS25_41acq01 HLS25_41acq03 --channel_info_path /mnt/data2/varrone/elisa_lymphomoids/mouse_channels.txt`
+An example of the script calling is: `python3 cellDetection.py --dir /mnt/data2/varrone/elisa_lymphomoids/Quantification/ --sample_names HLS25_7 HLS25_41acq01 HLS25_41acq03 --channel_info_path /mnt/data2/varrone/elisa_lymphomoids/mouse_channels.txt`
 
 A lot of warning messages will appear, but they are normal. As long as the message `Channels extracted successfully.` appears, the software will have worked successfully. 
 
@@ -128,8 +138,8 @@ This step obtains for each cell, from its mask detected in the cell detection st
 1. If the virtual environment has not been activated from the cell detection part, run the `source /mnt/data2/shared/Lymphomoid-IF-software/Lymphomoid-IF-venv/bin/activate` command to activate the virtual environment.
 
 2. Then, run the _quantifyIntensities.py_ script, with the same required parameters as in the cell detection step:
-   * `--sample_names`: the name of the images for cell detection, it could be 1 or many, separated by a whitespace.
-   * `--dir`: the absolute path of the _HLS\_Quantification_ directory
+   * `--sample_names`: a list of _ImageName_ of the images to process, it could be 1 or many, separated by a whitespace (see example later).
+   * `--dir`: the absolute path of the _Quantification_ directory
 
    <details>
    <summary>Parameters for non-standard uses of the pipeline</summary>
@@ -138,7 +148,7 @@ This step obtains for each cell, from its mask detected in the cell detection st
 
    </details>
 
-An example of the script calling is: `python3 quantifyIntensities.py --dir /mnt/data2/varrone/elisa_lymphomoids/HLS_Quantification/ --sample_names HLS25_7 HLS25_41acq01 HLS25_41acq03`.
+An example of the script calling is: `python3 quantifyIntensities.py --dir /mnt/data2/varrone/elisa_lymphomoids/Quantification/ --sample_names HLS25_7 HLS25_41acq01 HLS25_41acq03`.
 
 
 ### Optional: downloading the software
