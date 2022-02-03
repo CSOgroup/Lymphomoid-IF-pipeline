@@ -1,13 +1,13 @@
 
 ########## Input ##########
-MainDir = "/Users/daniele/Mounted_folder_daniele_ndata/elisa_lymphomoids/Processed/Pipeline_test/" # Absolute path to your main directory
-ConfigTable = "/Users/daniele/Mounted_folder_daniele_ndata/elisa_lymphomoids/Scripts/Lymphomoid-IF-pipeline/mouse_channels.txt" # Configuration table as 'mouse_channels.txt' or 'human_channels.txt' 
+MainDir = "/mnt/data1/Daniele/elisa_lymphomoids/Pipeline_final_test/" # Absolute path to your main directory
+ConfigTable = "/mnt/data1/Daniele/elisa_lymphomoids/Lymphomoid-IF-pipeline/human_channels.txt" # Configuration table as 'mouse_channels.txt' or 'human_channels.txt' 
 Lymphomoids_to_process = "all" # "all", or vector of boundary file names (e.g. Lymphomoids_to_process = c( "HLS01_s02_acq03_Pembroluzimab01_Boundary.txt", "HLS01_s02_acq03_Pembroluzimab02_Boundary.txt" ) )
 ###########################
 
 ###### Plotting parameters ######
 plot_IF_images = TRUE # TRUE or FALSE. FALSE makes the script run faster.
-antibody_colors = data.frame(antibody_mouse = c("B220","CD4","CD8","F4/80","otherCell"), antibody_human = c("CD20","CD4","CD8","CD68","otherCell"), color = c("green","yellow","cyan","magenta","gray"))
+antibody_colors = data.frame(antibody_mouse = c("B220","CD4","CD8","F4/80","otherCell"), antibody_human = c("CD20","CD4","CD8","CD68","otherCell"), color = c("green","yellow","cyan","magenta","gray"), stringsAsFactors = F)
 maxSizePlot_inches = 20
 cellSizePlot_um = 100
 boundary_thickness = 2
@@ -64,7 +64,7 @@ plot_digital_image = function(fileName, quant, plp_df, withOtherCells = T, onlyI
    if (onlyProliferating) { quant = quant[quant$is_proliferating,] }
    if (!withOtherCells) { quant = quant[quant$CellType_antibody != "otherCell",] }
    if (onlyInLymphomoid) { quant = quant[quant$in_lymphomoid,] }
-   abdf = data.frame(row.names = as.character(unique(quant$CellType_antibody)), ab = as.character(unique(quant$CellType_antibody)), color = unique(quant$CellType_color))
+   abdf = data.frame(row.names = as.character(unique(quant$CellType_antibody)), ab = as.character(unique(quant$CellType_antibody)), color = unique(quant$CellType_color), stringsAsFactors = F)
    colorz = abdf[intersect(levels(quant$CellType_antibody),rownames(abdf)),"color"]
    widthz = max(c(quant$spatial_1,plp_df$x))-min(c(quant$spatial_1,plp_df$x))
    heightz = max(c(quant$spatial_2,plp_df$y))-min(c(quant$spatial_2,plp_df$y))
@@ -83,11 +83,14 @@ plot_CellTypeProportions = function(markers, ldf, OutFileRoot){
    cdf$Sample = rownames(cdf)
    write.table(cdf, file = paste0(MainDir,OutFileRoot,".txt"), quote = F, col.names = T, row.names = T, sep = "\t")
    cdf = melt(cdf,id="Sample")
+   cdf = merge(cdf,ldf[,c("PatientLymphomoidName","TotalCells")],by.x = "Sample", by.y = "row.names")
    cdf$variable = factor(cdf$variable, levels = markers)
    cdf$Sample = factor(cdf$Sample, levels = rownames(ldf))
+   cdf$TotalCells = paste0("N=",round(cdf$TotalCells))
    pdf(paste0(MainDir,OutFileRoot,".pdf"),2*nrow(ldf),6)
    p = ggplot(data=cdf, aes(x=Sample, y=value, fill=variable)) +
-      geom_bar(stat="identity", colour="black", size = 0.5) + ylab("Proportion") + xlab("") + scale_fill_manual(name = "Marker",values=colors) + theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels= rownames(ldf))
+      geom_bar(stat="identity", colour="black", size = 0.5) + ylab("Proportion") + xlab("") + scale_fill_manual(name = "Marker",values=colors) + theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels=rownames(ldf)) +
+      geom_text(aes(label=TotalCells,y=1),vjust=-0.2)
    print(p)
    dev.off()
    return(p)
@@ -105,11 +108,15 @@ plot_ProlifVsNot = function(markers, ldf, OutFileRoot){
       cdf$Sample = rownames(cdf)
       write.table(cdf, file = paste0(MainDir,OutFileRoot,gsub("/","-",marker),".txt"), quote = F, col.names = T, row.names = T, sep = "\t")
       cdf = melt(cdf,id="Sample")
+      cdf = merge(cdf,ldf[,c("PatientLymphomoidName",marker )],by.x = "Sample", by.y = "row.names")
+      colnames(cdf)[colnames(cdf)==marker] = "TotalCells"
       cdf$variable = factor(cdf$variable, levels = c("Not proliferating","Proliferating"))
       cdf$Sample = factor(cdf$Sample, levels = rownames(ldf))
+      cdf$TotalCells = paste0("N=",round(cdf$TotalCells))
       pdf(paste0(MainDir,OutFileRoot,gsub("/","-",marker),".pdf"),2*nrow(ldf),6)
       p = ggplot(data=cdf, aes(x=Sample, y=value, fill=variable)) +
-         geom_bar(stat="identity", colour="black", size = 0.5) + ylab("Proportion") + xlab("") + scale_fill_manual(name = marker,values=c(colors[which(marker==markers)],prolif_color)) + theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels= rownames(ldf))
+         geom_bar(stat="identity", colour="black", size = 0.5) + ylab("Proportion") + xlab("") + scale_fill_manual(name = marker,values=c(colors[which(marker==markers)],prolif_color)) + theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels=rownames(ldf)) +
+         geom_text(aes(label=TotalCells,y=1),vjust=-0.2)
       print(p)
       dev.off()
    }
@@ -138,7 +145,7 @@ for (ll in Lymphomoids_to_process)
    ## Parsing and reading
    ImageName = sub("_[^_]+$", "", substr(ll,1,nchar(ll)-13))
    PatientLymphomoidName = substr(ll,nchar(ImageName)+2,nchar(ll)-13)
-   quant_file = paste0(MainDir,"HLS_Quantification/",ImageName,"/quantification/mesmer-",ImageName,"_merged.csv")
+   quant_file = paste0(MainDir,"Quantification/",ImageName,"/quantification/mesmer-",ImageName,"_merged.csv")
    quant_file_vec = c(quant_file_vec,substr(quant_file,nchar(MainDir)+1,nchar(quant_file)))
    if (!file.exists(quant_file)) { next }
    quant = read.csv(quant_file,stringsAsFactors = F)
@@ -169,7 +176,7 @@ for (ll in Lymphomoids_to_process)
    {
       fileName = paste0(MainDir,"Digital_IF_images/","IFimage_",ImageName,"_",PatientLymphomoidName,"_all.pdf")
       p = plot_digital_image(fileName, quant, plp_df, withOtherCells = T, onlyInLymphomoid = F, onlyProliferating = F)
-      fileName = paste0(MainDir,"Digital_IF_images/","IFimage_",ImageName,"_",PatientLymphomoidName,"_NoOtherCells_OnlyInLymphomoid.pdf")
+      fileName = paste0(MainDir,"Digital_IF_images/","IFimage_",ImageName,"_",PatientLymphomoidName,"_NoOtherCells_OnlyInLymphomoid_.pdf")
       p = plot_digital_image(fileName, quant, plp_df, withOtherCells = F, onlyInLymphomoid = T, onlyProliferating = F)
       fileName = paste0(MainDir,"Digital_IF_images/","IFimage_",ImageName,"_",PatientLymphomoidName,"_NoOtherCells_OnlyInLymphomoid_OnlyProliferating.pdf")
       p = plot_digital_image(fileName, quant, plp_df, withOtherCells = F, onlyInLymphomoid = T, onlyProliferating = T)
@@ -180,6 +187,11 @@ for (ll in Lymphomoids_to_process)
    quant$Y_centroid_nucleus = NULL
    colnames(quant)[colnames(quant) %in% c( "spatial_1","spatial_2" )] = c( "x_centroid_nucleus_um","y_centroid_nucleus_um" )
    quant = quant[quant$in_lymphomoid,]
+   if (nrow(quant) < 10 ) { 
+      cat( "\n","*** Warning: less than 10 cells inside the boundary! check the IF images under 'Digital_IF_images/' to see what is the problem", "\n" )
+      cat( "\n","*** Skipping",ll, "\n" )
+      next
+   }
    write.table(quant, file = paste0(MainDir,"Classified_cells_tables/Table_",ImageName,"_",PatientLymphomoidName,"_AllCells.txt"), row.names = F, col.names = T, quote = F, sep = "\t")
 
    ## Concatenating summary for all lymphomoids
