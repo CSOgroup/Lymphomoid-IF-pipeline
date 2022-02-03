@@ -111,11 +111,13 @@ In case you have doubts on to which .vsi file a .ome.tif file corresponds too, y
 ### Cell detection (i.e. segmentation)
 The cell detection script require few Python packages for basic file processing. They are all already installed as a Python virtual environment in _/mnt/data2/shared/Lymphomoid-IF-software/Lymphomoid-IF-venv/_. 
 
-If you want to download and install them somewhere else, the required packages are listed in the file _requirements.txt_. You can install them in your virtual environment or conda environment by running `pip install -r requirements.txt`.
+If you want to download and install them somewhere else, the required packages are listed in the file _requirements.txt_. Make sure that you are using Python 3. So if you are using a conda environment, run `conda install pip` before running `pip install -r requirements.txt`.
 
 1. To be able to access the packages you need to activate the environment using:
 
    `source /mnt/data2/shared/Lymphomoid-IF-software/Lymphomoid-IF-venv/bin/activate`
+
+   or activate your environment if you are using your own personal one.
 
 2. Then you need to run the _cellDetection.py_ script, with the following required parameters:
    * `--sample_names`: a list of _ImageName_ of the images to process, it could be 1 or many, separated by a whitespace (see example later).
@@ -160,7 +162,7 @@ As previously mentioned, the directory containing all the necessary software is 
 
 If you want to download or update the four software required:
 * bftools: bftools can be downloaded from the Bio-Formats [website](https://docs.openmicroscopy.org/bio-formats/6.8.1/users/comlinetools/index.html). Current version: 6.8.1.
-* Virtual Environment: the Python packages required for running the pipeline are listed in the file _requirements.txt_. If you want to install the packages in your current virtual environment you can run `pip install -r requirements.txt`.
+* Virtual Environment: the Python packages required for running the pipeline are listed in the file _requirements.txt_. If you want to install the packages in your current virtual environment, if you are using conda, make sure to run `conda install pip` first. Then you can run `pip install -r requirements.txt`. 
 * DeepCell: the image for Singularity can be downloaded running `singularity pull deepcell.sif docker://vanvalenlab/deepcell-applications:latest`. Current version: 0.3.1.
 * Nextflow: select the directory where ypu want to download nextflow and run `curl -s https://get.nextflow.io | bash`. For more information visit the [website](https://nextflow.io). Current version: 21.10.6.5660.
 * MCMICRO: you can get the latest version of MCMICRO by moving to the directory where _nextflow_ is (e.g. `/mnt/data2/shared/Lymphomoid-IF-software/nextflow`) and running `./nextflow pull labsyspharm/mcmicro`. For more information visit the [website](https://mcmicro.org). Current version: Github revision 46abd97bc0.
