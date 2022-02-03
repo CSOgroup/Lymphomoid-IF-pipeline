@@ -21,6 +21,7 @@ if (!getSelectedROI()) { println "No boundary selected" }
 def polyPoints = getSelectedROI().getAllPoints()
 String result = polyPoints.join(";")
 new File(MainDir+"Lymphomoid_boundaries/").mkdirs()
+new File(MainDir+"Tiff/").mkdirs()
 new File(MainDir+"Quantification/"+ImageName+"/registration").mkdirs()
 File file = new File(MainDir+"Lymphomoid_boundaries/"+OutFile)
 file.write result+"\n"
