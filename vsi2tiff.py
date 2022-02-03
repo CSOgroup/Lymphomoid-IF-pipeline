@@ -42,8 +42,6 @@ args = parser.parse_args()
 if not os.path.splitext(args.input_vsi):
     raise ValueError('The path from --input_vsi should be the path to the .vsi file.')
 
-os.makedirs(os.path.join(args.output_dir, 'Tiff'), exist_ok=True)
-
 parent_path, vsi_name = os.path.split(args.input_vsi)
 vsi_name = os.path.splitext(vsi_name)[0]
 sample_name = os.path.split(parent_path)[1]

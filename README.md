@@ -109,7 +109,10 @@ In this step we will convert the images from the .vsi to the .ome.tif format. Th
 In case you have doubts on to which .vsi file a .ome.tif file corresponds too, you can import the .ome.tif file in QuPath and compare it.
 
 ### Cell detection (i.e. segmentation)
-The cell detection script require few Python packages for basic file processing. They are all already installed as a Python virtual environment in _/mnt/data2/shared/Lymphomoid-IF-software/Lymphomoid-IF-venv/_.
+The cell detection script require few Python packages for basic file processing. They are all already installed as a Python virtual environment in _/mnt/data2/shared/Lymphomoid-IF-software/Lymphomoid-IF-venv/_. 
+
+If you want to download and install them somewhere else, the required packages are listed in the file _requirements.txt_. You can install them in your virtual environment or conda environment by running `pip install -r requirements.txt`.
+
 1. To be able to access the packages you need to activate the environment using:
 
    `source /mnt/data2/shared/Lymphomoid-IF-software/Lymphomoid-IF-venv/bin/activate`
