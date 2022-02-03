@@ -58,7 +58,7 @@ try:
     count = 1
     for i in range(o.image_count):
         if re.match(regex, o.image(i).Name):
-            output_path = os.path.join(args.output_dir, 'Tiff', f'{sample_name}_{vsi_name}_acq{count:02d}.ome.tif')
+            output_path = os.path.join(args.output_dir, f'{sample_name}_{vsi_name}_acq{count:02d}.ome.tif')
             if os.path.exists(output_path):
                 os.remove(output_path)
             run_command(f"{os.path.join(args.bftools_dir, 'bfconvert')} -option BF_MAXMEM 128g -series 12  -bigtiff -pyramid-resolutions 1 {args.input_vsi} {output_path}")
