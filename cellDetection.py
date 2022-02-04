@@ -15,7 +15,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--sample_names', type=str, nargs='+', required=True)
 parser.add_argument('--dir', type=str, required=True)
 parser.add_argument('--channel_info_path', type=str, required=True)
-parser.add_argument('--deepcell_path', type=str, default='/mnt/data2/shared/Lymphomoid-IF-software/deepcell_custom.sif')
+parser.add_argument('--deepcell_path', type=str, default='/mnt/data2/shared/Lymphomoid-IF-software/deepcell.sif')
 parser.add_argument('--nucleus_channel', type=str, default='DAPI')
 
 args = parser.parse_args()
