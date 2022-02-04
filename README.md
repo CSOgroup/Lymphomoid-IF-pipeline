@@ -76,7 +76,7 @@ Quantification
 ```
 
 ### VSI to .OME.TIF format conversion
-In this step we will convert the images from the .vsi to the .ome.tif format. The script uses a software called _bfconvert_ from Bio-Formats Tools.
+In this step we will convert the images from the .vsi to the .ome.tif format. The script uses a software called _bfconvert_ from Bio-Formats Tools, and requires the packages listed in the file _requirements.txt_. In order to install them, make sure that you are using Python 3, and if you are using a conda environment, run `conda install pip`. Then, run `pip install -r requirements.txt`.
 
 1. If it doesn't already exist, create a directory called _Tiff_ inside the main directory. So it should be at the same level of the _Quantification_ directory.
 2. Connect to the server using ssh on your Terminal and move to the directory containing the scripts of the pipeline.
@@ -112,7 +112,7 @@ In case you have doubts on to which .vsi file a .ome.tif file corresponds too, y
 ### Cell detection (i.e. segmentation)
 The cell detection script require few Python packages for basic file processing. They are all already installed as a Python virtual environment in _/mnt/data2/shared/Lymphomoid-IF-software/Lymphomoid-IF-venv/_. 
 
-If you want to download and install them somewhere else, the required packages are listed in the file _requirements.txt_. Make sure that you are using Python 3. So if you are using a conda environment, run `conda install pip` before running `pip install -r requirements.txt`.
+If you want to download and install them somewhere else, the required packages are listed in the file _requirements.txt_. 
 
 1. To be able to access the packages you need to activate the environment using:
 

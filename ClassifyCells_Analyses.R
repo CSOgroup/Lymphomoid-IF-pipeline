@@ -1,6 +1,6 @@
 
 ########## Input ##########
-MainDir = "/mnt/data1/Daniele/elisa_lymphomoids/Pipeline_final_test/" # Absolute path to your main directory
+MainDir = "/mnt/data1/Daniele/elisa_lymphomoids/test2/" # Absolute path to your main directory
 ConfigTable = "/mnt/data1/Daniele/elisa_lymphomoids/Lymphomoid-IF-pipeline/human_channels.txt" # Configuration table as 'mouse_channels.txt' or 'human_channels.txt' 
 Lymphomoids_to_process = "all" # "all", or vector of boundary file names (e.g. Lymphomoids_to_process = c( "HLS01_s02_acq03_Pembroluzimab01_Boundary.txt", "HLS01_s02_acq03_Pembroluzimab02_Boundary.txt" ) )
 ###########################
@@ -71,7 +71,7 @@ plot_digital_image = function(fileName, quant, plp_df, withOtherCells = T, onlyI
    rescaling_to_plot = maxSizePlot_inches/max(c(widthz,heightz))
    r = cellSizePlot_um * rescaling_to_plot
    pdf( file = fileName, width = widthz*rescaling_to_plot, height = heightz*rescaling_to_plot, useDingbats = F)
-   p = ggplot(quant, aes(x=spatial_1, y=spatial_2, color=CellType_antibody)) + geom_point(stroke=0,size=r) + scale_color_manual(values=colorz ) + scale_y_reverse() + geom_path(data = plp_df, mapping = aes(x = x, y = y), color = "red", size = boundary_thickness) + theme_void() + theme(panel.background = element_rect(fill = 'black', colour = 'black')) + theme(legend.position = 'none')
+   p = ggplot(quant, aes(x=spatial_1, y=spatial_2, color=CellType_antibody)) + geom_point(stroke=0,size=r) + scale_color_manual(values=colorz ) + scale_y_reverse() + geom_path(data = plp_df, mapping = aes(x = x, y = y), color = "red", size = boundary_thickness) + theme_void() + theme(legend.position = 'none') + theme(panel.background = element_rect(fill = 'black', colour = 'black'), plot.background = element_rect(fill = "black"))
    print(p)
    dev.off()
    return(p)

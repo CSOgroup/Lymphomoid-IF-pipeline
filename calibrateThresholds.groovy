@@ -10,8 +10,8 @@ def imageData = QPEx.getCurrentImageData()
 clearDetections();
 
 // ----------- Input ----------- 
-MainDir = "/Users/daniele/Mounted_folder_daniele_ndata/elisa_lymphomoids/Processed/Pipeline_final_test/" // Absolute path to your main directory
-ConfigTable = "/Users/daniele/Mounted_folder_daniele_ndata/elisa_lymphomoids/Scripts/Lymphomoid-IF-pipeline/human_channels.txt" // Configuration table as 'mouse_channels.txt' or 'human_channels.txt' 
+MainDir = "/Users/daniele/Mounted_folder8/Daniele/elisa_lymphomoids/test2/" // Absolute path to your main directory
+ConfigTable = "/Users/daniele/Mounted_folder8/Daniele/elisa_lymphomoids/Lymphomoid-IF-pipeline/human_channels.txt" // Configuration table as 'mouse_channels.txt' or 'human_channels.txt' 
 ImageName = "HLS16_s01_acq03"
 DAPI_thresh = 100
 FITC_thresh = 280
@@ -54,8 +54,8 @@ setCellIntensityClassifications(channel_celllocation_map['FITC']+": FITC mean", 
 
 
 // ----------- Saving ----------- 
-new File(MainDir+"Calibrated_thresholds/").mkdirs()
-File file = new File(MainDir+"Calibrated_thresholds/"+ImageName+"_AllThresholds.txt")
+new File(MainDir+"/Calibrated_thresholds/").mkdirs()
+File file = new File(MainDir+"/Calibrated_thresholds/"+ImageName+"_AllThresholds.txt")
 file.write "DAPI_thresh "+DAPI_thresh+"\n"+"FITC_thresh "+FITC_thresh+"\n"+"CY5_thresh "+CY5_thresh+"\n"+"CFP_thresh "+CFP_thresh+"\n"+"RFP_thresh "+RFP_thresh+"\n"+"Alexa_thresh "+Alexa_thresh+"\n"
 println "Calibrated thresholds saved"
 // ------------------------------ 

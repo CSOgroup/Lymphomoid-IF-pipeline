@@ -10,8 +10,8 @@ def server = imageData.getServer()
 double pixelDimMicrons = server.getPixelCalibration().getAveragedPixelSizeMicrons()
 
 // ----------- Input ----------- 
-MainDir = "/Users/daniele/Mounted_folder_daniele_ndata/elisa_lymphomoids/Processed/Pipeline_final_test/" // Absolute path to your main directory
-ImageName = "HLS16_s01_acq02"
+MainDir = "/Users/daniele/Mounted_folder8/Daniele/elisa_lymphomoids/test2/" // Absolute path to your main directory
+ImageName = "HLS16_s01_acq03"
 PatientLymphomoidName = "LP02ctrl01" // Avoid underscores for PatientLymphomoidName
 // -----------------------------
 
@@ -20,10 +20,10 @@ OutFile = ImageName+"_"+PatientLymphomoidName+"_Boundary.txt" // Output file nam
 if (!getSelectedROI()) { println "No boundary selected" }
 def polyPoints = getSelectedROI().getAllPoints()
 String result = polyPoints.join(";")
-new File(MainDir+"Lymphomoid_boundaries/").mkdirs()
-new File(MainDir+"Tiff/").mkdirs()
-new File(MainDir+"Quantification/"+ImageName+"/registration").mkdirs()
-File file = new File(MainDir+"Lymphomoid_boundaries/"+OutFile)
+new File(MainDir+"/Lymphomoid_boundaries/").mkdirs()
+new File(MainDir+"/Tiff/").mkdirs()
+new File(MainDir+"/Quantification/"+ImageName+"/registration").mkdirs()
+File file = new File(MainDir+"/Lymphomoid_boundaries/"+OutFile)
 file.write result+"\n"
 file << "PixelDim="+pixelDimMicrons.toString()+"\n"
 // -----------------------------
