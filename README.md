@@ -59,6 +59,7 @@ This step, except the part of format conversion, is fairly automatized, so it is
 
 DeepCell is a nuclei and cell segmentation software that is more robust to different levels of marker intensity and, thus, gives better results when the intensity of DAPI varies dramatically in the same sample.
 
+
 The script run in Step 2 should have already created, inside the main directory, a directory called _Quantification_. _Quantification_ contains other directories with the _ImageName_ for which boundaries have been drawn and finally, each of this directory should contain an empty directory called _registration_.
 
 To summarize, you should find a structure like the following:
@@ -141,12 +142,12 @@ The run may take a while for each image (tens of minutes). For this reason, it i
 ### Marker quantification (i.e. segmentation)
 This step obtains for each cell, from its mask detected in the cell detection step, the mean intensities of each of the markers in the nucleus and in the cytoplasm.
 
-1. If the virtual environment has not been activated from the cell detection part, run the `source /mnt/data2/shared/Lymphomoid-IF-software/Lymphomoid-IF-venv/bin/activate` command to activate the virtual environment.
-
-2. Then, run the _quantifyIntensities.py_ script, with the same required parameters as in the cell detection step:
+1. To run this step, check first that you are part of the Docker group on the server. If your username is in the output of `grep /etc/group -e "docker"`, you can move to the next point, otherwise ask the system admin (currently Luca Nanni) to add you to the Docker group.
+2. If the virtual environment has not been activated from the cell detection part, run the `source /mnt/data2/shared/Lymphomoid-IF-software/Lymphomoid-IF-venv/bin/activate` command to activate the virtual environment.
+3. Then, run the _quantifyIntensities.py_ script, with the same required parameters as in the cell detection step:
    * `--sample_names`: a list of _ImageName_ of the images to process, it could be 1 or many, separated by a whitespace (see example later).
    * `--dir`: the absolute path of the _Quantification_ directory
-
+   * `--channel_info_path`: the path to the .txt or .tsv file containing information on the image channels. The values must be separated by tabs. In particular, the file must contain a _Channel\_name_ and a _Cellular\_location_ (Nucleus or Cytoplasm) column.
    <details>
    <summary>Parameters for non-standard uses of the pipeline</summary>
 
@@ -154,7 +155,7 @@ This step obtains for each cell, from its mask detected in the cell detection st
 
    </details>
 
-An example of the script calling is: `python3 quantifyIntensities.py --dir /mnt/data2/varrone/elisa_lymphomoids/Quantification/ --sample_names HLS25_7 HLS25_41acq01 HLS25_41acq03`.
+An example of the script calling is: `python3 quantifyIntensities.py --dir /mnt/data2/varrone/elisa_lymphomoids/Quantification/ --sample_names HLS25_7 HLS25_41acq01 HLS25_41acq03 --channel_info_path /mnt/data2/varrone/elisa_lymphomoids/mouse_channels.txt`
 
 
 ### Optional: downloading the software
