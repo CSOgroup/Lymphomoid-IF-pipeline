@@ -193,6 +193,25 @@ The script will generate the following output under MainDir (all folders are cre
 * `Results_ImageXLymphomoid_level/*` same output of the point above, but without lymphomoid-level summarization (i.e. 'image X lymphomoid' level). It could be useful to check that two images of the same lymphomoid (before summarization) have comparable cell proportions
 * `log_files/*` .log files with date and time of the script runs in their name and containing the various input file paths for reproducibility
 
+## Step 6 - Neighbourhood analysis
+Here we take the tables with classified cells under `Classified_cells_tables/` and investigate the neighbourhood of a given cell type, computed with Delaunay triangulation. The Python script _NeighbourhoodAnalyses.py_ considers a query cell type (e.g. B cells) and determines, for each lymphomoid (1) the neighbourhood composition in terms of relative frequency of each cell type in its nearest neighbours, and (2) the density distributions of physical distances (in µm) between query cells and each cell type in its neighbourhood. 
+
+The input of _NeighbourhoodAnalyses.py_ is the following:
+* `--main_dir`: your main directory, same as for the previous steps
+* `--lymphomoids_to_process`: set to 'all' if you want all lymphomoids saved under `Classified_cells_tables/` to be processed, otherwise specify a subset of them as a character list (default: 'all')
+* `--celltype_query`: the cell type of which you want to compute the analyse the neighbourhood (default: 'Bcells')
+* `--celltype_query_proliferation_status`: whether to consider 'any' of the query cells, only 'proliferating' or only 'not_proliferating' (it solely accepts these three values, default: 'any')
+* `--consider_othercells`: whether to consider unclassified 'otherCells' in the neighbourhood composition (default: 'False')
+* `--plot_delaunay`: whether to plot the spatial Delaunay networks (default: 'True')
+* `--custom_file_prefix`: optional prefix to add to the output files (default: '')
+
+An example of script call is:
+`python NeighbourhoodAnalyses.py --main_dir '/mnt/ndata/daniele/elisa_lymphomoids/Processed/Pipeline_test/' --lymphomoids_to_process 'all' --celltype_query 'Bcells' --celltype_query_proliferation_status 'any' --consider_othercells False --plot_delaunay True --custom_file_prefix 'Test24Apr_'`
+
+Output files (plots and tables with query cell-level neighbourhood composition and distances) are saved in the newly created `Neighbourhood_analyses/` under MainDir.
+
+Nearest neighbours that are farther than the 95th percentile of physical distances (i.e. relatively far neighbours) are discarded. Results are reported both at the 'lymphomoid'-level (summarizing results of multiple acquisitions of the same lymphomoid) and at the 'image X lymphomoid'-level.
+
 Since all tables are saved, you can customize your plots/perfom additional downstream analyses by reading them back in your favourite programming language.
 
 
