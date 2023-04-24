@@ -12,7 +12,7 @@ clearDetections();
 // ----------- Input ----------- 
 MainDir = "/Users/daniele/Mounted_folder8/Daniele/elisa_lymphomoids/test2/" // Absolute path to your main directory
 ConfigTable = "/Users/daniele/Mounted_folder8/Daniele/elisa_lymphomoids/Lymphomoid-IF-pipeline/human_channels.txt" // Configuration table as 'mouse_channels.txt' or 'human_channels.txt' 
-ImageName = "HLS16_s01_acq03"
+ImageName = "expand_to_all_available_images" // Either a specific 'ImageName' (e.g. 'HLS16_s01_acq01'), or 'expand_to_all_available_images'. In the latter case, the same calibration table will be copied for all images under the 'Lymphomoid_boundaries/' folder (careful, not calibrating the thresholds separately for each image might result in unrealistic cell type calls).
 DAPI_thresh = 100
 FITC_thresh = 280
 CY5_thresh = 110
@@ -55,8 +55,20 @@ setCellIntensityClassifications(channel_celllocation_map['FITC']+": FITC mean", 
 
 // ----------- Saving ----------- 
 new File(MainDir+"/Calibrated_thresholds/").mkdirs()
-File file = new File(MainDir+"/Calibrated_thresholds/"+ImageName+"_AllThresholds.txt")
-file.write "DAPI_thresh "+DAPI_thresh+"\n"+"FITC_thresh "+FITC_thresh+"\n"+"CY5_thresh "+CY5_thresh+"\n"+"CFP_thresh "+CFP_thresh+"\n"+"RFP_thresh "+RFP_thresh+"\n"+"Alexa_thresh "+Alexa_thresh+"\n"
+if (ImageName=="expand_to_all_available_images"){
+    dh = new File(MainDir+'/Lymphomoid_boundaries/')
+    dh.eachFile {
+        String thiss = it
+        thiss = thiss.replaceAll(".+/", "");
+        thiss = thiss.substring(0,thiss.lastIndexOf("_"));
+        thiss = thiss.substring(0,thiss.lastIndexOf("_"));
+        File file = new File(MainDir+"/Calibrated_thresholds/"+thiss+"_AllThresholds.txt")
+        file.write "DAPI_thresh "+DAPI_thresh+"\n"+"FITC_thresh "+FITC_thresh+"\n"+"CY5_thresh "+CY5_thresh+"\n"+"CFP_thresh "+CFP_thresh+"\n"+"RFP_thresh "+RFP_thresh+"\n"+"Alexa_thresh "+Alexa_thresh+"\n"        
+    }
+} else {
+    File file = new File(MainDir+"/Calibrated_thresholds/"+ImageName+"_AllThresholds.txt")
+    file.write "DAPI_thresh "+DAPI_thresh+"\n"+"FITC_thresh "+FITC_thresh+"\n"+"CY5_thresh "+CY5_thresh+"\n"+"CFP_thresh "+CFP_thresh+"\n"+"RFP_thresh "+RFP_thresh+"\n"+"Alexa_thresh "+Alexa_thresh+"\n"        
+}
 println "Calibrated thresholds saved"
 // ------------------------------ 
 
