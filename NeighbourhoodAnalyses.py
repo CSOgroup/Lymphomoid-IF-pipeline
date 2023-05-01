@@ -53,6 +53,9 @@ for ll in lymphomoids_to_process:
         df = df.loc[df.CellType_marker != "otherCell",:]
     df.CellType_marker = df.CellType_marker.str.replace(" ","")
     df.CellType_marker = df.CellType_marker.str.replace("Tcells","")
+    if (np.sum(df.CellType_marker==args.celltype_query)<5):
+        print("Skipping", ll,", less than 5 query",args.celltype_query)
+        continue
     adata = anndata.AnnData(df.iloc[:,3:7],obsm={"spatial": np.array(df.iloc[:,7:9])},dtype=np.float32)
     adata.obs['CellType_color'] = df.CellType_color.values
     adata.obs['CellType_marker'] = df.CellType_marker.values
