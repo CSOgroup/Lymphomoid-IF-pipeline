@@ -198,15 +198,15 @@ Here we take the tables with classified cells under `Classified_cells_tables/` a
 
 The input of _NeighbourhoodAnalyses.py_ is the following:
 * `--main_dir`: your main directory, same as for the previous steps
-* `--lymphomoids_to_process`: set to 'all' if you want all lymphomoids saved under `Classified_cells_tables/` to be processed, otherwise specify a subset of them as a character list (default: 'all')
-* `--celltype_query`: the cell type of which you want to compute the analyse the neighbourhood (default: 'Bcells')
-* `--celltype_query_proliferation_status`: whether to consider 'any' of the query cells, only 'proliferating' or only 'not_proliferating' (it solely accepts these three values, default: 'any')
-* `--consider_othercells`: whether to consider unclassified 'otherCells' in the neighbourhood composition (default: 'False')
-* `--plot_delaunay`: whether to plot the spatial Delaunay networks (default: 'True')
-* `--custom_file_prefix`: optional prefix to add to the output files (default: '')
+* `--lymphomoids_to_process`: set to _all_ if you want all lymphomoids saved under `Classified_cells_tables/` to be processed, otherwise specify a subset of them as a character list (default: _all_)
+* `--celltype_query`: the cell type of which you want to compute the analyse the neighbourhood (default: Bcells)
+* `--celltype_query_proliferation_status`: whether to consider _any_ of the query cells, only _proliferating_ or only _not_proliferating_ (it solely accepts these three values, default: _any_)
+* `--consider_othercells`: whether to consider unclassified otherCells in the neighbourhood composition (default: False)
+* `--plot_delaunay`: whether to plot the spatial Delaunay networks (default: True)
+* `--custom_file_prefix`: optional prefix to add to the output files
 
 An example of script call is:
-`python NeighbourhoodAnalyses.py --main_dir '/mnt/ndata/daniele/elisa_lymphomoids/Processed/Pipeline_test/' --lymphomoids_to_process 'all' --celltype_query 'Bcells' --celltype_query_proliferation_status 'any' --consider_othercells False --plot_delaunay True --custom_file_prefix 'Test24Apr_'`
+`python NeighbourhoodAnalyses.py --main_dir /mnt/ndata/daniele/elisa_lymphomoids/Processed/Pipeline_test/ --lymphomoids_to_process all --celltype_query Bcells --celltype_query_proliferation_status any --consider_othercells False --plot_delaunay True --custom_file_prefix Test24Apr_`
 
 Output files (plots and tables with query cell-level neighbourhood composition and distances) are saved in the newly created `Neighbourhood_analyses/` under MainDir.
 
