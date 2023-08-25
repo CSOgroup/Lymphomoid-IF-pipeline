@@ -147,13 +147,19 @@ for (ll in Lymphomoids_to_process)
    PatientLymphomoidName = substr(ll,nchar(ImageName)+2,nchar(ll)-13)
    quant_file = paste0(MainDir,"Quantification/",ImageName,"/quantification/mesmer-",ImageName,"_merged.csv")
    quant_file_vec = c(quant_file_vec,substr(quant_file,nchar(MainDir)+1,nchar(quant_file)))
-   if (!file.exists(quant_file)) { next }
+   if (!file.exists(quant_file)) { 
+      cat("\n","Attention!",quant_file,"does not exist. Moving on to the next lymphomoid...","\n" )
+      next }
    quant = read.csv(quant_file,stringsAsFactors = F)
    quant = quant[,!(colnames(quant) %in% c( "Area_nucleus","MajorAxisLength_nucleus","MinorAxisLength_nucleus","Eccentricity_nucleus","Solidity_nucleus","Extent_nucleus","Orientation_nucleus","X_centroid_cytoplasm","Y_centroid_cytoplasm","Area_cytoplasm","MajorAxisLength_cytoplasm","MinorAxisLength_cytoplasm","Eccentricity_cytoplasm","Solidity_cytoplasm","Extent_cytoplasm","Orientation_cytoplasm" ))]
    colnames(quant)[colnames(quant)=="F4.80"] = "F4/80"
    calib_file = paste0(MainDir,"Calibrated_thresholds/",ImageName,"_AllThresholds.txt")
    calib_file_vec = c(calib_file_vec,substr(calib_file,nchar(MainDir)+1,nchar(calib_file)))
-   if (!file.exists(calib_file)) { next }
+   if (!file.exists(calib_file)) { 
+      calib_file = paste0(MainDir,"Calibrated_thresholds/",ImageName,"_",PatientLymphomoidName,"_AllThresholds.txt")
+      if (!file.exists(calib_file)) { 
+      cat("\n","Attention! Calibration file not found. Moving on to the next lymphomoid...","\n" )
+      next }}
    calib = read.table( file = calib_file, sep = " ", header = F, quote = '' ,stringsAsFactors = F)
    rownames(calib) = calib$V1
    pl = read.table(file = paste0(MainDir,"Lymphomoid_boundaries/",ll), sep = "-")
