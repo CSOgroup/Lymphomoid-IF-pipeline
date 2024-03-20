@@ -76,7 +76,7 @@ Quantification
 ```
 
 ### VSI to .OME.TIF format conversion
-In this step we will convert the images from the .vsi to the .ome.tif format. The script uses a software called _bfconvert_ from Bio-Formats Tools, and requires the packages listed in the file _requirements.txt_. In order to install them, make sure that you are using Python 3 (version 3.8 or newer), and if you are using a conda environment, run `conda install pip`. Then, run `pip install numpy`, and subsequently run `pip install -r requirements.txt`.
+In this step we will convert the images from the .vsi to the .ome.tif format. The script uses a software called _bfconvert_ from Bio-Formats Tools, and requires the packages listed in the file _requirements.txt_. In order to install them, make sure that you are using Python 3 (version 3.8 or newer), and if you are using a conda environment, run `conda install -c conda-forge pip openjdk`. Then, run `pip install numpy`, then `pip install -r requirements.txt` and finally `pip install numpy --upgrade`.
 
 1. If it doesn't already exist, create a directory called _Tiff_ inside the main directory. So it should be at the same level of the _Quantification_ directory.
 2. Connect to the server using ssh on your Terminal and move to the directory containing the scripts of the pipeline.
