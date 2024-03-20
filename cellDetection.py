@@ -18,6 +18,7 @@ parser.add_argument('--channel_info_path', type=str, required=True)
 parser.add_argument('--deepcell_path', type=str, default='/mnt/data2/shared/Lymphomoid-IF-software/deepcell.sif')
 parser.add_argument('--nucleus_channel', type=str, default='DAPI')
 parser.add_argument('--n_cores', type=int, default=10)
+parser.add_argument('--batch_size', type=int, default=4)
 
 args = parser.parse_args()
 
@@ -57,12 +58,14 @@ for filename in tqdm(args.sample_names):
         tifffile.imsave(os.path.join(channels_dir, f'{name}_nucleus.tif'), image[nucleus_channel_index])
         tifffile.imsave(os.path.join(channels_dir, f'{name}_membrane.tif'), np.max(image[membrane_channel_indexes], axis=0))
 
-        # Perform nucleus and whole-cell segmentation using DeepCell's Mesmer
-        run_command(f"singularity exec --env TF_CPP_MIN_LOG_LEVEL=2 --cpus {args.n_cores} --home /tmp/{os.getlogin()} --bind {output_dir}:/data {args.deepcell_path} /usr/local/bin/python /usr/src/app/run_app.py mesmer --nuclear-image {os.path.join('/data', 'channels', f'{name}_nucleus.tif')} --output-directory {os.path.join('/data', 'segmentation', 'tmp')} --output-name {name}_nuclear_mask.tif --compartment nuclear --squeeze")
-        run_command(f"singularity exec --env TF_CPP_MIN_LOG_LEVEL=2 --cpus {args.n_cores} --home /tmp/{os.getlogin()} --bind {output_dir}:/data {args.deepcell_path} /usr/local/bin/python /usr/src/app/run_app.py mesmer --nuclear-image {os.path.join('/data', 'channels', f'{name}_nucleus.tif')} --membrane-image {os.path.join('/data', 'channels', f'{name}_membrane.tif')} --output-directory {os.path.join('/data', 'segmentation', 'tmp')} --output-name {name}_whole_cell_mask.tif --compartment whole-cell --squeeze")
+        del image
 
-        print(f'Segmentation completed for sample {name}')
+    # Perform nucleus and whole-cell segmentation using DeepCell's Mesmer
+    run_command(f"singularity exec --env TF_CPP_MIN_LOG_LEVEL=2,OMP_NUM_THREADS={args.n_cores},TF_NUM_INTRAOP_THREADS={args.n_cores},TF_NUM_INTEROP_THREADS={args.n_cores} --home /tmp/{os.getlogin()} --bind {output_dir}:/data {args.deepcell_path} /usr/local/bin/python /usr/src/app/run_app.py mesmer --nuclear-image {os.path.join('/data', 'channels', f'{name}_nucleus.tif')} --output-directory {os.path.join('/data', 'segmentation', 'tmp')} --output-name {name}_nuclear_mask.tif --compartment nuclear --squeeze --batch-size={args.batch_size}")
+    run_command(f"singularity exec --env TF_CPP_MIN_LOG_LEVEL=2,OMP_NUM_THREADS={args.n_cores},TF_NUM_INTRAOP_THREADS={args.n_cores},TF_NUM_INTEROP_THREADS={args.n_cores} --home /tmp/{os.getlogin()} --bind {output_dir}:/data {args.deepcell_path} /usr/local/bin/python /usr/src/app/run_app.py mesmer --nuclear-image {os.path.join('/data', 'channels', f'{name}_nucleus.tif')} --membrane-image {os.path.join('/data', 'channels', f'{name}_membrane.tif')} --output-directory {os.path.join('/data', 'segmentation', 'tmp')} --output-name {name}_whole_cell_mask.tif --compartment whole-cell --squeeze --batch-size={args.batch_size}")
 
-        shutil.rmtree(channels_dir)
+    print(f'Segmentation completed for sample {name}')
+
+    shutil.rmtree(channels_dir)
 print()
 print('Channels extracted successfully.')
