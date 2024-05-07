@@ -2,7 +2,7 @@ matplotlib==3.6.3
 numpy==1.22.1
 pandas==1.5.0
 tifffile==2021.11.2
-tqdm==4.62.3
+tqdm==4.66.3
 python-bioformats==4.0.5
 xmltodict==0.12.0
 seaborn==0.12.2
