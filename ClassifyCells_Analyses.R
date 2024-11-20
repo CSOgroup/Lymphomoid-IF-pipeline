@@ -13,7 +13,6 @@ antibody_colors = data.frame(antibody_mouse = c("B220","CD4","CD8","F4/80","othe
 maxSizePlot_inches = 20
 cellSizePlot_um = 100
 boundary_thickness = 2
-# prolif_color = "deepskyblue"
 #################################
 
 ########## Functions ##########
@@ -84,7 +83,6 @@ classify_cells = function(quant, ll_config){
       quant[,paste0(marker,"+")] = quant[,marker]>ll_config[marker,"calibrated_thresholds"]
    }
 
-   # quant[,"is_proliferating"] = as.numeric(quant[,"Ki67"])>ll_config["Ki67","calibrated_thresholds"]
    return(quant)
 }
 
