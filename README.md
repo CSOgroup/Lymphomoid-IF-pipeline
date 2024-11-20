@@ -59,7 +59,6 @@ This step, except the part of format conversion, is fairly automatized, so it is
 
 DeepCell is a nuclei and cell segmentation software that is more robust to different levels of marker intensity and, thus, gives better results when the intensity of DAPI varies dramatically in the same sample.
 
-
 The script run in Step 2 should have already created, inside the main directory, a directory called _Quantification_. _Quantification_ contains other directories with the _ImageName_ for which boundaries have been drawn and finally, each of this directory should contain an empty directory called _registration_.
 
 To summarize, you should find a structure like the following:
@@ -75,12 +74,25 @@ Quantification
 ...
 ```
 
-### VSI to .OME.TIF format conversion
-In this step we will convert the images from the .vsi to the .ome.tif format. The script uses a software called _bfconvert_ from Bio-Formats Tools, and requires the packages listed in the file _requirements.txt_. In order to install them, make sure that you are using Python 3 (version 3.8 or newer), and if you are using a conda environment, run `conda install -c conda-forge pip openjdk`. Then, run `pip install numpy`, then `pip install -r requirements.txt` and finally `pip install numpy --upgrade`.
 
-1. If it doesn't already exist, create a directory called _Tiff_ inside the main directory. So it should be at the same level of the _Quantification_ directory.
-2. Connect to the server using ssh on your Terminal and move to the directory containing the scripts of the pipeline.
-3. Run the script _vsi2tiff.py_ with the following required parameters:
+### Conda environment (one-time setup)
+The scripts in this step require some packages that need to be installed in a Conda environment.
+
+If you don't have a Conda environment, you can create one by running `conda create -n lymphomoid_if conda-forge::python=3.9`.
+
+In order to install the packages listed in the file _requirements.txt_, run `conda install -c conda-forge openjdk gcc singularity python-javabridge ome::bftools bioconda::nextflow=21.10.6`. Then `pip install -r requirements.txt`.
+
+This step must be done only once. The next time you need to use the pipeline, you can activate the environment with `conda activate lymphomoid_if`.
+
+
+
+### VSI to .OME.TIF format conversion
+In this step we will convert the images from the .vsi to the .ome.tif format. The script uses a software called _bfconvert_ from Bio-Formats Tools.
+
+1. If not yet activated, activate the environment using `conda activate lymphomoid_if`.
+2. If it doesn't already exist, create a directory called _Tiff_ inside the main directory. So it should be at the same level of the _Quantification_ directory.
+3. Connect to the server using ssh on your Terminal and move to the directory containing the scripts of the pipeline.
+4. Run the script _vsi2tiff.py_ with the following required parameters:
    * `--input_vsi`: the path to the .vsi file that needs to be converted into .ome.tif files.
    * `--output_dir`: the path to the _Tiff_ directory
 
@@ -90,9 +102,9 @@ In this step we will convert the images from the .vsi to the .ome.tif format. Th
    * `--bftools_dir`: the path to the _bftools_ director. The default is `/mnt/data2/shared/Lymphomoid-IF-software/bftools` where it's already present.
 
    </details>
-4. Note that a single vsi will generate a separate .ome.tif file for each image acquisition. The script will create multiple .ome.tif files concatenating the name of the parent directory of the .vsi file, the name of the .vsi file and the acquisition number.
-5. Delete the acquisitions that have been discarded in Step 1. You can identify those acquisitions because there is no equivalent directory inside _Quantification_.
-6. Rename with _ImageName.ome.tif_ and move each image into the _registration_ folder of the corresponding directory. So, every registration folder should contain one and only one .ome.tif file, as in the following diagram:
+5. Note that a single vsi will generate a separate .ome.tif file for each image acquisition. The script will create multiple .ome.tif files concatenating the name of the parent directory of the .vsi file, the name of the .vsi file and the acquisition number.
+6. Delete the acquisitions that have been discarded in Step 1. You can identify those acquisitions because there is no equivalent directory inside _Quantification_.
+7. Rename with _ImageName.ome.tif_ and move each image into the _registration_ folder of the corresponding directory. So, every registration folder should contain one and only one .ome.tif file, as in the following diagram:
    ```bash
    Quantification
    ├── HLS07_s01_acq01
@@ -110,17 +122,9 @@ In this step we will convert the images from the .vsi to the .ome.tif format. Th
 In case you have doubts on to which .vsi file a .ome.tif file corresponds too, you can import the .ome.tif file in QuPath and compare it.
 
 ### Cell detection (i.e. segmentation)
-The cell detection script require few Python packages for basic file processing. They are all already installed as a Python virtual environment in _/mnt/data2/shared/Lymphomoid-IF-software/Lymphomoid-IF-venv/_. 
+1. If the environment is not yet activated, activate it using `conda activate lymphomoid_if`.
 
-If you want to download and install them somewhere else, the required packages are listed in the file _requirements.txt_. 
-
-1. To be able to access the packages you need to activate the environment using:
-
-   `source /mnt/data2/shared/Lymphomoid-IF-software/Lymphomoid-IF-venv/bin/activate`
-
-   or activate your environment if you are using your own personal one.
-
-2. Then you need to run the _cellDetection.py_ script, with the following required parameters:
+2. Run the _cellDetection.py_ script, with the following required parameters:
    * `--sample_names`: a list of _ImageName_ of the images to process, it could be 1 or many, separated by a whitespace (see example later).
    * `--dir`: the path of the _Quantification_ directory
    * `--channel_info_path`: the path to the .txt or .tsv file containing information on the image channels. The values must be separated by tabs. In particular, the file must contain a _Channel\_name_ and a _Cellular\_location_ (Nucleus or Cytoplasm) column.
@@ -142,9 +146,9 @@ The run may take a while for each image (tens of minutes). For this reason, it i
 ### Marker quantification (i.e. segmentation)
 This step obtains for each cell, from its mask detected in the cell detection step, the mean intensities of each of the markers in the nucleus and in the cytoplasm.
 
-1. To run this step, check first that you are part of the Docker group on the server. If your username is in the output of `grep /etc/group -e "docker"`, you can move to the next point, otherwise ask the system admin (currently Luca Nanni) to add you to the Docker group.
-2. If the virtual environment has not been activated from the cell detection part, run the `source /mnt/data2/shared/Lymphomoid-IF-software/Lymphomoid-IF-venv/bin/activate` command to activate the virtual environment.
-3. Then, run the _quantifyIntensities.py_ script, with the same required parameters as in the cell detection step:
+1. To run this step, check first that you are part of the Docker group on the server. If your username is in the output of `grep /etc/group -e "docker"`, you can move to the next point, otherwise ask the system admin (currently Divyanshu Srivastava) to add you to the Docker group.
+2. If the conda environment is not yet activated, activate it using `conda activate lymphomoid_if`.
+3. Run the _quantifyIntensities.py_ script, with the same required parameters as in the cell detection step:
    * `--sample_names`: a list of _ImageName_ of the images to process, it could be 1 or many, separated by a whitespace (see example later).
    * `--dir`: the absolute path of the _Quantification_ directory
    * `--channel_info_path`: the path to the .txt or .tsv file containing information on the image channels. The values must be separated by tabs. In particular, the file must contain a _Channel\_name_ and a _Cellular\_location_ (Nucleus or Cytoplasm) column.
@@ -165,7 +169,7 @@ If you want to download or update the four software required:
 * bftools: bftools can be downloaded from the Bio-Formats [website](https://docs.openmicroscopy.org/bio-formats/6.8.1/users/comlinetools/index.html). Current version: 6.8.1.
 * Virtual Environment: the Python packages required for running the pipeline are listed in the file _requirements.txt_. If you want to install the packages in your current virtual environment, if you are using conda, make sure to run `conda install pip` first. Then you can run `pip install -r requirements.txt`. 
 * DeepCell: the image for Singularity can be downloaded running `singularity pull deepcell.sif docker://vanvalenlab/deepcell-applications:latest`. Current version: 0.3.1.
-* Nextflow: select the directory where ypu want to download nextflow and run `curl -s https://get.nextflow.io | bash`. For more information visit the [website](https://nextflow.io). Current version: 21.10.6.5660.
+* Nextflow: select the directory where you want to download nextflow and run `curl -s https://get.nextflow.io | bash`. For more information visit the [website](https://nextflow.io). Current version: 21.10.6.5660.
 * MCMICRO: you can get the latest version of MCMICRO by moving to the directory where _nextflow_ is (e.g. `/mnt/data2/shared/Lymphomoid-IF-software/nextflow`) and running `./nextflow pull labsyspharm/mcmicro`. For more information visit the [website](https://mcmicro.org). Current version: Github revision 46abd97bc0.
 
 ## Step 5 - Classify cells and downstream analyses
