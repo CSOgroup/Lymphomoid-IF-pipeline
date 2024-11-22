@@ -202,15 +202,15 @@ Here we take the tables with classified cells under `Classified_cells_tables/` a
 
 The input of _NeighbourhoodAnalyses.py_ is the following:
 * `--main_dir`: your main directory, same as for the previous steps
+* `--channel_info_path`: the path to the .txt or .tsv file containing information on the image channels. The values must be separated by tabs. In particular, the file must contain a _Channel\_name_ and a _Cellular\_location_ (Nucleus or Cytoplasm) column.
 * `--lymphomoids_to_process`: set to _all_ if you want all lymphomoids saved under `Classified_cells_tables/` to be processed, otherwise specify a subset of them as a character list (default: _all_)
 * `--celltype_query`: the cell type of which you want to compute the analyse the neighbourhood (default: Bcells)
-* `--celltype_query_proliferation_status`: whether to consider _any_ of the query cells, only _proliferating_ or only _not_proliferating_ (it solely accepts these three values, default: _any_)
 * `--consider_othercells`: whether to consider unclassified otherCells in the neighbourhood composition (default: False)
 * `--plot_delaunay`: whether to plot the spatial Delaunay networks (default: True)
 * `--custom_file_prefix`: optional prefix to add to the output files
 
 An example of script call is:
-`python NeighbourhoodAnalyses.py --main_dir /mnt/ndata/daniele/elisa_lymphomoids/Processed/Pipeline_test/ --lymphomoids_to_process all --celltype_query Bcells --celltype_query_proliferation_status any --consider_othercells False --plot_delaunay True --custom_file_prefix Test24Apr_`
+`python NeighbourhoodAnalyses.py --main_dir /mnt/ndata/daniele/elisa_lymphomoids/Processed/Pipeline_test/ --channel_info_path /mnt/data2/varrone/elisa_lymphomoids/mouse_channels.txt --lymphomoids_to_process all --celltype_query Bcells --consider_othercells False --plot_delaunay True --custom_file_prefix Test24Apr_`
 
 Output files (plots and tables with query cell-level neighbourhood composition and distances) are saved in the newly created `Neighbourhood_analyses/` under MainDir.
 
@@ -218,5 +218,9 @@ Nearest neighbours that are farther than the 95th percentile of physical distanc
 
 Since all tables are saved, you can customize your plots/perfom additional downstream analyses by reading them back in your favourite programming language.
 
-
-
+# CHANGELOG
+- 22Nov2024: It's possible to define non-cell-type markers in the configuration talbe. Those markers will not be used for cell type classification, but their intensity will be used to divide cells into positive or negative for that marker. This is a generalization of the previous implementation, that was specific for Ki67 (proliferation marker).
+   - The configuration tables must contain a new column called `Is_CellType_Marker` that can be either `TRUE` or `FALSE`.
+   - The plots will not include `proliferating` vs `not proliferating`, but `marker+` vs `marker-`. The old proliferating cells are now `Ki67+`.
+   - Neighborhood analyses does not require the `--celltype_query_proliferation_status` parameter anymore, but requires the the path to the configuration table using the parameter `--channel_info_path`.
+   - Neighborhood analyses outputs plots and tables for cells negative for all markers, but also for cells positive for each marker individually. The file names also include the query cell type.
