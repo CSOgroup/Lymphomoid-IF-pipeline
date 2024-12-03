@@ -1,7 +1,7 @@
 
 ########## Input ##########
-MainDir = "/mnt/ndata/varrone/Packages/Lymphomoid-IF-pipeline/output_example/" # Absolute path to your main directory
-ConfigTable = "/mnt/ndata/varrone/Packages/Lymphomoid-IF-pipeline/human_channels.txt" # Configuration table as 'mouse_channels.txt' or 'human_channels.txt' 
+MainDir = "/mnt/ndata/daniele/elisa_lymphomoids/Processed/Pipeline_test/" # Absolute path to your main directory
+ConfigTable = "/mnt/ndata/daniele/elisa_lymphomoids/Lymphomoid-IF-pipeline/mouse_channels.txt" # Configuration table as 'mouse_channels.txt' or 'human_channels.txt' 
 Lymphomoids_to_process = "all" # "all", or vector of boundary file names (e.g. Lymphomoids_to_process = c( "HLS01_s02_acq03_Pembroluzimab01_Boundary.txt", "HLS01_s02_acq03_Pembroluzimab02_Boundary.txt" ) )
 ###########################
 
@@ -180,7 +180,7 @@ plot_NonCellTypeMarker = function(cell_type_markers, non_cell_type_markers, ldf,
          
          # Write proportions to output file
          write.table(cdf, 
-                    file = paste0(MainDir, OutFileRoot, gsub("/","-",cell_marker), "_", other_marker, ".txt"), 
+                    file = paste0(MainDir, OutFileRoot, gsub("/","-",cell_marker), "_", gsub("/","-",other_marker), ".txt"), 
                     quote = F, col.names = T, row.names = T, sep = "\t")
          
          # Reshape data for plotting
@@ -197,7 +197,7 @@ plot_NonCellTypeMarker = function(cell_type_markers, non_cell_type_markers, ldf,
          cdf$TotalCells = paste0("N=", round(cdf$TotalCells))
          
          # Create stacked bar plot
-         pdf(paste0(MainDir, OutFileRoot, gsub("/","-",cell_marker), "_", other_marker, ".pdf"), 
+         pdf(paste0(MainDir, OutFileRoot, gsub("/","-",cell_marker), "_", gsub("/","-",other_marker), ".pdf"), 
              2*nrow(ldf), 6)
          
          p = ggplot(data=cdf, aes(x=Sample, y=value, fill=variable)) +
@@ -311,7 +311,7 @@ for (ll in Lymphomoids_to_process)
       for (marker in other_markerz)
       {
          if (marker != "DAPI") {
-            fileName = paste0(MainDir,"Digital_IF_images/","IFimage_",ImageName,"_",PatientLymphomoidName,"_NoOtherCells_OnlyInLymphomoid_",marker,".pdf")
+            fileName = paste0(MainDir,"Digital_IF_images/","IFimage_",ImageName,"_",PatientLymphomoidName,"_NoOtherCells_OnlyInLymphomoid_",gsub("/","-",marker),".pdf")
             p = plot_digital_image(fileName, quant, plp_df, withOtherCells = F, onlyInLymphomoid = T, nonCellTypeMarker = marker)
          }
       }
@@ -354,11 +354,12 @@ for (ll in Lymphomoids_to_process)
      # Add columns for each combination to the ttdf data frame
      for (i in 1:nrow(combinations)) {
        combination = combinations[i, ]
+       names(combination) = colnames(combinations) # necessary when there is only one marker
        combination_name = paste0(cell_type_marker, "_", paste0(names(combination), ifelse(combination, "+", "-"), collapse = "_"))
        
        # Count cells matching the combination, treating NA as FALSE
        ttdf[, combination_name] = sum(quant$CellType_antibody == cell_type_marker & 
-         apply(quant[, paste0(marker_names, "+")], 1, function(row) {
+         apply(as.data.frame(quant[, paste0(marker_names, "+")]), 1, function(row) { # as.data.frame handles the case in which there is only one marker (which would be otherwise interpreted as vector)
            all(ifelse(is.na(row), FALSE, row) == combination)
          }))
      }

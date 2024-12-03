@@ -25,7 +25,7 @@ args = parser.parse_args()
 
 this_palette = {"Bcells":"#00EE00","otherCell":"gray","Macrophages":"#EE00EE","CD4":"#FFD700","CD8":"#00CDCD"}
 
-if args.lymphomoids_to_process[0]=='all':
+if args.lymphomoids_to_process=='all':
     lymphomoids_to_process = os.listdir(args.main_dir+'Classified_cells_tables')
     lymphomoids_to_process = np.unique([x[6:len(x)-13] for x in lymphomoids_to_process if x.startswith("Table")])
 else:
