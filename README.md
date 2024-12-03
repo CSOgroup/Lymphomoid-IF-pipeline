@@ -219,8 +219,8 @@ Nearest neighbours that are farther than the 95th percentile of physical distanc
 Since all tables are saved, you can customize your plots/perfom additional downstream analyses by reading them back in your favourite programming language.
 
 # CHANGELOG
-- 22Nov2024: It's possible to define non-cell-type markers in the configuration talbe. Those markers will not be used for cell type classification, but their intensity will be used to divide cells into positive or negative for that marker. This is a generalization of the previous implementation, that was specific for Ki67 (proliferation marker).
+- 22Nov2024: It's possible to define non-cell-type markers in the configuration table. Those markers will not be used for cell type classification, but their intensity will be used to divide cells into positive or negative for that marker. This is a generalization of the previous implementation, that was specific for Ki67 (proliferation marker).
    - The configuration tables must contain a new column called `Is_CellType_Marker` that can be either `TRUE` or `FALSE`.
    - The plots will not include `proliferating` vs `not proliferating`, but `marker+` vs `marker-`. The old proliferating cells are now `Ki67+`.
-   - Neighborhood analyses does not require the `--celltype_query_proliferation_status` parameter anymore, but requires the the path to the configuration table using the parameter `--channel_info_path`.
+   - Neighborhood analyses does not require the `--celltype_query_proliferation_status` parameter anymore, but requires the path to the configuration table using the parameter `--channel_info_path`.
    - Neighborhood analyses outputs plots and tables for cells negative for all markers, but also for cells positive for each marker individually. The file names also include the query cell type.
