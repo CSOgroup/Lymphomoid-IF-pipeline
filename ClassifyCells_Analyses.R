@@ -1,3 +1,6 @@
+########## ToDo ##########
+# add slash if MainDir does not have one
+
 
 ########## Input ##########
 MainDir = "/mnt/ndata/daniele/elisa_lymphomoids/Processed/Pipeline_test/" # Absolute path to your main directory
@@ -45,7 +48,7 @@ parse_boundary = function(pl, pixelSize){
 
 classify_cells = function(quant, ll_config){
    # Classify cells based on the thresholded intensity values only for the cell type markers
-   this_inte = sweep(quant[,rownames(ll_config)[ll_config$Is_CellType_Marker]],2,ll_config[rownames(ll_config)[ll_config$Is_CellType_Marker],"calibrated_thresholds"])
+   this_inte = sweep(quant[,rownames(ll_config)[ll_config$Is_CellType_Marker]],2, ll_config[rownames(ll_config)[ll_config$Is_CellType_Marker],"calibrated_thresholds"])
    
    # Identify cells that have positive intensity values for any marker
    is_cell = rowSums(this_inte>0)>0
@@ -57,8 +60,8 @@ classify_cells = function(quant, ll_config){
    inteMax = apply(this_inte,1,which.max)
    
    # Add spatial coordinates and cell type indices to the quantification data
-   quant$spatial_1 = quant$X_centroid_nucleus*pixelSize
-   quant$spatial_2 = quant$Y_centroid_nucleus*pixelSize
+   quant$spatial_1 = quant$Centroid.X.µm#*pixelSize
+   quant$spatial_2 = quant$Centroid.Y.µm#*pixelSize
    quant$CellType_index = 0
    quant[names(inteMax),"CellType_index"] = as.character(inteMax)
    quant$CellType_color = "gray"
@@ -225,8 +228,10 @@ plot_NonCellTypeMarker = function(cell_type_markers, non_cell_type_markers, ldf,
 channels = read.table( file = ConfigTable, sep = "\t", header = T, quote = '' ,stringsAsFactors = F)
 dir.create(paste0(MainDir,"Digital_IF_images/"), showWarnings = F)
 dir.create(paste0(MainDir,"Classified_cells_tables/"), showWarnings = F)
-if (Lymphomoids_to_process=="all"){ Lymphomoids_to_process = list.files(paste0( MainDir,"Lymphomoid_boundaries/" ), pattern = "Boundary.txt") }
-
+if (Lymphomoids_to_process=="all")
+{
+   Lymphomoids_to_process = list.files(paste0( MainDir,"Lymphomoid_boundaries/" ), pattern = "Boundary.txt") 
+}
 # Set antibody colors based on whether mouse or human antibodies are used
 if (grepl("mouse_channels.txt", ConfigTable)) {
   rownames(antibody_colors) = antibody_colors$antibody_mouse
@@ -252,6 +257,7 @@ colnames(tdf)[colnames(tdf)=="F4.80"] = "F4/80"
 quant_file_vec = c() # for log file
 calib_file_vec = c() # for log file
 
+
 # Process each lymphoid region
 for (ll in Lymphomoids_to_process)
 {
@@ -262,7 +268,7 @@ for (ll in Lymphomoids_to_process)
    PatientLymphomoidName = substr(ll,nchar(ImageName)+2,nchar(ll)-13)
    
    # Load quantification data
-   quant_file = paste0(MainDir,"Quantification/",ImageName,"/quantification/mesmer-",ImageName,"_merged.csv")
+   quant_file = paste0(MainDir,"Quantification/",ImageName,"/measurements.csv")
    quant_file_vec = c(quant_file_vec,substr(quant_file,nchar(MainDir)+1,nchar(quant_file)))
    if (!file.exists(quant_file)) { 
       cat("\n","Attention!",quant_file,"does not exist. Moving on to the next lymphomoid...","\n" )
@@ -272,6 +278,14 @@ for (ll in Lymphomoids_to_process)
    # Remove unnecessary morphological measurements from quantification data
    quant = quant[,!(colnames(quant) %in% c( "Area_nucleus","MajorAxisLength_nucleus","MinorAxisLength_nucleus","Eccentricity_nucleus","Solidity_nucleus","Extent_nucleus","Orientation_nucleus","X_centroid_cytoplasm","Y_centroid_cytoplasm","Area_cytoplasm","MajorAxisLength_cytoplasm","MinorAxisLength_cytoplasm","Eccentricity_cytoplasm","Solidity_cytoplasm","Extent_cytoplasm","Orientation_cytoplasm" ))]
    colnames(quant)[colnames(quant)=="F4.80"] = "F4/80"
+   
+   for (channel in channels$Channel_name) {
+      old_col = paste0("Cell..", gsub(" ", ".", channel), "..Mean")
+      if (old_col %in% colnames(quant)) {
+         new_col = channels[channels$Channel_name == channel, "Antibody"]
+         colnames(quant)[colnames(quant) == old_col] = new_col
+      }
+   }
    
    # Load calibration thresholds
    calib_file = paste0(MainDir,"Calibrated_thresholds/",ImageName,"_AllThresholds.txt")
@@ -298,6 +312,7 @@ for (ll in Lymphomoids_to_process)
    ## Classify cells and identify those within lymphoid boundary
    quant = classify_cells(quant, ll_config)
    inPolygon = point.in.polygon(point.x = quant$spatial_1, point.y = quant$spatial_2, pol.x = plp_df$x, pol.y = plp_df$y)
+   
    quant$in_lymphomoid = inPolygon==1
 
    ## Generate visualization plots if requested
@@ -320,7 +335,7 @@ for (ll in Lymphomoids_to_process)
    ## Clean up and save cell data
    quant$X_centroid_nucleus = NULL
    quant$Y_centroid_nucleus = NULL
-   colnames(quant)[colnames(quant) %in% c( "spatial_1","spatial_2" )] = c( "x_centroid_nucleus_um","y_centroid_nucleus_um" )
+   colnames(quant)[colnames(quant) %in% c( "Centroid.X.µm","Centroid.Y.µm" )] = c( "x_centroid_nucleus_um","y_centroid_nucleus_um" )
    quant = quant[quant$in_lymphomoid,]
    
    # Skip if too few cells found
