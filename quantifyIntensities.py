@@ -57,7 +57,10 @@ for name in tqdm(args.sample_names):
     if not os.path.exists(os.path.join(output_dir, 'quantification')):
         os.chdir(args.dir)
         print('Start quantification...')
-        run_command(f"{args.nextflow_dir} run labsyspharm/mcmicro --profile singularity --in {name} --start-at quantification --stop-at quantification --probability-maps mesmer --quant-opts '--masks nuclei.tif cytoplasm.tif'")
+        if args.nextflow_dir and os.path.exists(args.nextflow_dir):
+            run_command(f"{args.nextflow_dir} run --in {name} -profile singularity --start-at quantification --stop-at quantification --probability-maps mesmer --quant-opts '--masks nuclei.tif cytoplasm.tif' ")
+        else:
+            run_command(f"nextflow run labsyspharm/mcmicro -r 46abd97bc0 --in {name} -profile singularity --start-at quantification --stop-at quantification --probability-maps mesmer --quant-opts '--masks nuclei.tif cytoplasm.tif'")
 
         os.chdir(working_dir)
 

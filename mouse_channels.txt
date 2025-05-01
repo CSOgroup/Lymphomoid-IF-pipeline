@@ -1,7 +1,7 @@
-Channel_name	Cellular_location	Antibody	Marker_of	Fluorochrome	Species
-DAPI	Nucleus	DAPI	Nucleus	DAPI	Mouse
-FITC	Cytoplasm	B220	B cells	FAM	Mouse
-CFP	Cytoplasm	CD4	CD4 T cells	DCC	Mouse
-CY5	Cytoplasm	CD8	CD8 T cells	Cy5	Mouse
-Alexa 594	Nucleus	Ki67	Proliferation	R610	Mouse
-RFP	Cytoplasm	F4/80	Macrophages	R6G	Mouse
+Channel_name	Cellular_location	Antibody	Marker_of	Fluorochrome	Species	Is_CellType_Marker
+DAPI	Nucleus	DAPI	Nucleus	DAPI	Mouse	FALSE
+FITC	Cytoplasm	B220	B cells	FAM	Mouse	TRUE
+CFP	Cytoplasm	CD4	CD4 T cells	DCC	Mouse	TRUE
+CY5	Cytoplasm	CD8	CD8 T cells	Cy5	Mouse	TRUE
+Alexa 594	Nucleus	Ki67	Proliferation	R610	Mouse	FALSE
+RFP	Cytoplasm	F4/80	Macrophages	R6G	Mouse	TRUE
