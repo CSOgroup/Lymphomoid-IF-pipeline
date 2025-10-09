@@ -1,12 +1,10 @@
-########## ToDo ##########
-# add slash if MainDir does not have one
-
-
 ########## Input ##########
 MainDir = "/mnt/ndata/daniele/elisa_lymphomoids/Processed/Pipeline_test/" # Absolute path to your main directory
 ConfigTable = "/mnt/ndata/daniele/elisa_lymphomoids/Lymphomoid-IF-pipeline/mouse_channels.txt" # Configuration table as 'mouse_channels.txt' or 'human_channels.txt' 
 Lymphomoids_to_process = "all" # "all", or vector of boundary file names (e.g. Lymphomoids_to_process = c( "HLS01_s02_acq03_Pembroluzimab01_Boundary.txt", "HLS01_s02_acq03_Pembroluzimab02_Boundary.txt" ) )
 ###########################
+
+if (!grepl("/$", MainDir)) { MainDir = paste0(MainDir, "/") }
 
 ###### Plotting parameters ######
 plot_IF_images = TRUE # TRUE or FALSE. FALSE makes the script run faster.
